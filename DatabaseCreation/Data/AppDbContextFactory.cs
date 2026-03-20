@@ -9,7 +9,7 @@ namespace DatabaseCreation.Data
         public AppDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlServer("Server=MRG\\MSSQLSERVER01;Database=Garment_Factory;Trusted_Connection=True;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("your-connection-string-here");
 
             var httpContextAccessor = new HttpContextAccessor();
 
