@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="DatabaseCreation/DatabaseCreation.csproj" />
+  <Project Path="Repository/Repository.csproj" Id="41f8a7ba-84fa-46ca-821a-35369bb963f9" />
+  <Project Path="Services/Services.csproj" Id="2f21ac25-8e6c-4d67-9966-b068c45e1c8e" />
+  <Project Path="Shared/Shared.csproj" Id="fec26676-9405-4fdd-b879-14118ca6171c" />
+</Solution>
