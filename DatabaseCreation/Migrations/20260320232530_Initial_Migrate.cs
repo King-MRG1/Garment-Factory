@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DatabaseCreation.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial_Migrate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,17 +52,23 @@ namespace DatabaseCreation.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Inventory",
+                name: "Models",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Last_Update = table.Column<DateOnly>(type: "date", nullable: false)
+                    Model_Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Price_Trader = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price_Stitcher = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price_Ironer = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price_Cutter = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Total_Units = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    Last_Update = table.Column<DateOnly>(type: "date", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Inventory", x => x.Id);
+                    table.PrimaryKey("PK_Models", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -76,7 +82,8 @@ namespace DatabaseCreation.Migrations
                     Trader_Type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Register_date = table.Column<DateOnly>(type: "date", nullable: false),
-                    Last_Update = table.Column<DateOnly>(type: "date", nullable: false)
+                    Last_Update = table.Column<DateOnly>(type: "date", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -93,7 +100,8 @@ namespace DatabaseCreation.Migrations
                     Worker_Type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Hire_Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    Last_Update = table.Column<DateOnly>(type: "date", nullable: false)
+                    Last_Update = table.Column<DateOnly>(type: "date", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,32 +215,6 @@ namespace DatabaseCreation.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Models",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Model_Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Price_Trader = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Price_Stitcher = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Price_Iron = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Price_Cutter = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Total_Units = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    Last_Update = table.Column<DateOnly>(type: "date", nullable: false),
-                    Inventory_Id = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Models", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Models_Inventory_Inventory_Id",
-                        column: x => x.Inventory_Id,
-                        principalTable: "Inventory",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Expenses",
                 columns: table => new
                 {
@@ -243,7 +225,8 @@ namespace DatabaseCreation.Migrations
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Expense_Date = table.Column<DateOnly>(type: "date", nullable: false),
                     Last_Update = table.Column<DateOnly>(type: "date", nullable: false),
-                    Trader_Id = table.Column<int>(type: "int", nullable: false)
+                    Trader_Id = table.Column<int>(type: "int", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -265,19 +248,14 @@ namespace DatabaseCreation.Migrations
                     Fabric_Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Metres = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DateAdded = table.Column<DateOnly>(type: "date", nullable: false),
                     Last_Update = table.Column<DateOnly>(type: "date", nullable: false),
-                    Inventory_Id = table.Column<int>(type: "int", nullable: false),
-                    Trader_Id = table.Column<int>(type: "int", nullable: false)
+                    Trader_Id = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Fabrics", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Fabrics_Inventory_Inventory_Id",
-                        column: x => x.Inventory_Id,
-                        principalTable: "Inventory",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Fabrics_Traders_Trader_Id",
                         column: x => x.Trader_Id,
@@ -294,7 +272,8 @@ namespace DatabaseCreation.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Total_Cost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Order_Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    Trader_Id = table.Column<int>(type: "int", nullable: false)
+                    Trader_Id = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -318,7 +297,8 @@ namespace DatabaseCreation.Migrations
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Revenue_Date = table.Column<DateOnly>(type: "date", nullable: false),
                     Last_Update = table.Column<DateOnly>(type: "date", nullable: false),
-                    Trader_Id = table.Column<int>(type: "int", nullable: false)
+                    Trader_Id = table.Column<int>(type: "int", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -341,7 +321,8 @@ namespace DatabaseCreation.Migrations
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    Worker_Id = table.Column<int>(type: "int", nullable: false)
+                    Worker_Id = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -362,7 +343,8 @@ namespace DatabaseCreation.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Number = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     Worker_Id = table.Column<int>(type: "int", nullable: true),
-                    Trader_Id = table.Column<int>(type: "int", nullable: true)
+                    Trader_Id = table.Column<int>(type: "int", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -387,7 +369,8 @@ namespace DatabaseCreation.Migrations
                 {
                     Model_Id = table.Column<int>(type: "int", nullable: false),
                     Order_Id = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -456,19 +439,9 @@ namespace DatabaseCreation.Migrations
                 column: "Trader_Id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Fabrics_Inventory_Id",
-                table: "Fabrics",
-                column: "Inventory_Id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Fabrics_Trader_Id",
                 table: "Fabrics",
                 column: "Trader_Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Models_Inventory_Id",
-                table: "Models",
-                column: "Inventory_Id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderModels_Model_Id",
@@ -546,9 +519,6 @@ namespace DatabaseCreation.Migrations
 
             migrationBuilder.DropTable(
                 name: "Worker");
-
-            migrationBuilder.DropTable(
-                name: "Inventory");
 
             migrationBuilder.DropTable(
                 name: "Traders");

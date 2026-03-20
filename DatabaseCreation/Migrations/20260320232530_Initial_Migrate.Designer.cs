@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DatabaseCreation.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260313195421_addInventoryToToken")]
-    partial class addInventoryToToken
+    [Migration("20260320232530_Initial_Migrate")]
+    partial class Initial_Migrate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -48,6 +48,10 @@ namespace DatabaseCreation.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Worker_Id")
                         .HasColumnType("int");
@@ -159,6 +163,10 @@ namespace DatabaseCreation.Migrations
                     b.Property<int?>("Trader_Id")
                         .HasColumnType("int");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Trader_Id");
@@ -174,13 +182,13 @@ namespace DatabaseCreation.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateOnly>("DateAdded")
+                        .HasColumnType("date");
+
                     b.Property<string>("Fabric_Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
-
-                    b.Property<int>("Inventory_Id")
-                        .HasColumnType("int");
 
                     b.Property<DateOnly>("Last_Update")
                         .HasColumnType("date");
@@ -194,41 +202,15 @@ namespace DatabaseCreation.Migrations
                     b.Property<int>("Trader_Id")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("Inventory_Id");
+                    b.HasKey("Id");
 
                     b.HasIndex("Trader_Id");
 
                     b.ToTable("Fabrics");
-                });
-
-            modelBuilder.Entity("DatabaseCreation.Models.Inventory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateOnly>("Last_Update")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
-
-                    b.ToTable("Inventory");
                 });
 
             modelBuilder.Entity("DatabaseCreation.Models.Model", b =>
@@ -238,9 +220,6 @@ namespace DatabaseCreation.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Inventory_Id")
-                        .HasColumnType("int");
 
                     b.Property<DateOnly>("Last_Update")
                         .HasColumnType("date");
@@ -253,7 +232,7 @@ namespace DatabaseCreation.Migrations
                     b.Property<decimal>("Price_Cutter")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("Price_Iron")
+                    b.Property<decimal>("Price_Ironer")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Price_Stitcher")
@@ -267,9 +246,11 @@ namespace DatabaseCreation.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.HasKey("Id");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("Inventory_Id");
+                    b.HasKey("Id");
 
                     b.ToTable("Models");
                 });
@@ -291,6 +272,10 @@ namespace DatabaseCreation.Migrations
                     b.Property<int>("Trader_Id")
                         .HasColumnType("int");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Trader_Id");
@@ -308,6 +293,10 @@ namespace DatabaseCreation.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Order_Id", "Model_Id");
 
@@ -331,6 +320,10 @@ namespace DatabaseCreation.Migrations
 
                     b.Property<int?>("Trader_Id")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Worker_Id")
                         .HasColumnType("int");
@@ -374,6 +367,10 @@ namespace DatabaseCreation.Migrations
                     b.Property<int?>("Trader_Id")
                         .HasColumnType("int");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Trader_Id");
@@ -413,6 +410,10 @@ namespace DatabaseCreation.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Traders");
@@ -436,6 +437,10 @@ namespace DatabaseCreation.Migrations
 
                     b.Property<DateOnly>("Last_Update")
                         .HasColumnType("date");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Worker_Name")
                         .IsRequired()
@@ -608,42 +613,13 @@ namespace DatabaseCreation.Migrations
 
             modelBuilder.Entity("DatabaseCreation.Models.Fabric", b =>
                 {
-                    b.HasOne("DatabaseCreation.Models.Inventory", "Inventory")
-                        .WithMany("Fabrics")
-                        .HasForeignKey("Inventory_Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("DatabaseCreation.Models.Trader", "Trader")
                         .WithMany("Fabrics")
                         .HasForeignKey("Trader_Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Inventory");
-
                     b.Navigation("Trader");
-                });
-
-            modelBuilder.Entity("DatabaseCreation.Models.Inventory", b =>
-                {
-                    b.HasOne("DatabaseCreation.Models.ApplicationUser", "User")
-                        .WithOne("Inventory")
-                        .HasForeignKey("DatabaseCreation.Models.Inventory", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DatabaseCreation.Models.Model", b =>
-                {
-                    b.HasOne("DatabaseCreation.Models.Inventory", "Inventory")
-                        .WithMany("Models")
-                        .HasForeignKey("Inventory_Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Inventory");
                 });
 
             modelBuilder.Entity("DatabaseCreation.Models.Order", b =>
@@ -752,18 +728,6 @@ namespace DatabaseCreation.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("DatabaseCreation.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Inventory");
-                });
-
-            modelBuilder.Entity("DatabaseCreation.Models.Inventory", b =>
-                {
-                    b.Navigation("Fabrics");
-
-                    b.Navigation("Models");
                 });
 
             modelBuilder.Entity("DatabaseCreation.Models.Model", b =>
