@@ -1,0 +1,15 @@
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\bin\Debug\net10.0\DatabaseCreation.deps.json
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\bin\Debug\net10.0\DatabaseCreation.runtimeconfig.json
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\bin\Debug\net10.0\DatabaseCreation.dll
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\bin\Debug\net10.0\DatabaseCreation.pdb
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.csproj.AssemblyReference.cache
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.GeneratedMSBuildEditorConfig.editorconfig
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.AssemblyInfoInputs.cache
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.AssemblyInfo.cs
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.csproj.CoreCompileInputs.cache
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.dll
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\refint\DatabaseCreation.dll
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.pdb
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.genruntimeconfig.cache
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\ref\DatabaseCreation.dll
+D:\coding\DotNET\Garment_Factory\DatabaseCreation\obj\Debug\net10.0\DatabaseCreation.sourcelink.json
