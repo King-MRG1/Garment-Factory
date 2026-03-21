@@ -30,6 +30,7 @@ namespace DatabaseCreation.Data
         public DbSet<Revenue> Revenues { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<AdvanceAndDeduction> AdvanceAndDeductions { get; set; }
+        public DbSet<RefreshTokenStore> RefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
