@@ -1,10 +1,10 @@
-# DatabaseCreation
+# Database
 
 A robust Entity Framework Core-based database layer for the Garment Factory Management System, providing comprehensive data models, migrations, and database context configuration for enterprise-level garment production and inventory management.
 
 ## 📋 Overview
 
-The **DatabaseCreation** project establishes the foundational data access layer for the Garment Factory application. It leverages Entity Framework Core with SQL Server to manage all database operations, including:
+The **Database** project establishes the foundational data access layer for the Garment Factory application. It leverages Entity Framework Core with SQL Server to manage all database operations, including:
 
 - **Entity Models**: Comprehensive domain models for garment production, inventory, employees, and financial operations
 - **Database Context**: ASP.NET Core Identity integration with custom DbContext implementation
@@ -14,11 +14,23 @@ The **DatabaseCreation** project establishes the foundational data access layer 
 ## 🏗️ Project Structure
 
 ```
-DatabaseCreation/
+Database/
 ├── Data/
 │   ├── AppDbContext.cs              # Main database context with Identity integration
 │   ├── AppDbContextFactory.cs       # Design-time context factory for migrations
 │   └── Configurations/              # Entity configuration classes
+│       ├── ApplicationUserConfiguration.cs
+│       ├── AdvanceAndDeductionConfiguration.cs
+│       ├── ExpenseConfiguration.cs
+│       ├── FabricConfiguration.cs
+│       ├── ModelConfiguration.cs
+│       ├── OrderConfiguration.cs
+│       ├── OrderModelConfiguration.cs
+│       ├── PhoneConfiguration.cs
+│       ├── RefreshTokenStoreConfiguration.cs
+│       ├── RevenueConfiguration.cs
+│       ├── TraderConfiguration.cs
+│       └── WorkerConfiguration.cs
 ├── Models/
 │   ├── ApplicationUser.cs           # Identity user model
 │   ├── Worker.cs                    # Employee/worker entity
@@ -30,6 +42,7 @@ DatabaseCreation/
 │   ├── Trader.cs                    # Business partners
 │   ├── Phone.cs                     # Contact information
 │   ├── AdvanceAndDeduction.cs       # Employee advances/deductions
+│   ├── RefreshTokenStore.cs         # Refresh token storage for authentication
 │   ├── Model.cs                     # Base model entity
 │   └── IUserOwner.cs                # Interface for user-owned entities
 └── Migrations/
@@ -90,7 +103,7 @@ DatabaseCreation/
 
 4. **Apply Database Migrations**
    ```bash
-   dotnet ef database update --project DatabaseCreation
+   dotnet ef database update --project Database
    ```
 
 ## 📊 Database Models
@@ -109,28 +122,37 @@ DatabaseCreation/
 | **Revenue**             | Revenue records linked to orders and users                 |
 | **Trader**              | External business partners and vendors                     |
 | **AdvanceAndDeduction** | Employee salary advances and deductions                    |
+| **RefreshTokenStore**   | Refresh token storage with expiry and revocation tracking  |
 | **Phone**               | Contact phone numbers for users and traders                |
 
 ## 🔄 Migrations
 
 The project uses Entity Framework Core migrations for version-controlled schema management. Current migrations include:
 
-- `InitialCreate`: Initial database schema setup
-- `addInventoryToToken`: Added inventory tracking features
-- `addDateFabric`: Added date tracking to fabric entities
-- And subsequent refinements
+- `Initial_Migrate` (20260320232530): Initial database schema setup with all core entities and ASP.NET Core Identity tables
+- `AddRefreshTokenStore` (20260321132814): Added RefreshTokenStore table with token expiry tracking, revocation support, and foreign key relationship to ApplicationUser
+
+### Migration Details
+
+The **RefreshTokenStore** migration creates a `RefreshTokens` table with:
+
+- Token validation and management for JWT refresh token flow
+- Automatic timestamp tracking (CreatedAt via `GETUTCDATE()`)
+- Unique constraint on Token column for integrity
+- Indexes on UserId, ExpiryDate, and Token for efficient queries
+- Cascade delete when associated user is removed
 
 ### Creating New Migrations
 
 ```bash
 # Generate a new migration
-dotnet ef migrations add MigrationName --project DatabaseCreation
+dotnet ef migrations add MigrationName --project Database
 
 # Update database with new migration
-dotnet ef database update --project DatabaseCreation
+dotnet ef database update --project Database
 
 # Revert to previous migration (if needed)
-dotnet ef database update PreviousMigrationName --project DatabaseCreation
+dotnet ef database update PreviousMigrationName --project Database
 ```
 
 ## 🔐 Security Features
@@ -168,7 +190,7 @@ using (var context = new AppDbContext(options, httpContextAccessor))
         UserId = "user-123"
 ```
 
-The DatabaseCreation project is the foundation for:
+The Database project is the foundation for:
 
 - **Repository Layer**: Provides data access abstractions
 - **Services Layer**: Implements business logic using repositories
