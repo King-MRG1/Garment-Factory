@@ -1,0 +1,15 @@
+# Build outputs
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+
+# NuGet
+*.nuget.props
+*.nuget.targets
+project.nuget.cache
+
+# Logs
+*.log
