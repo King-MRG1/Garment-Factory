@@ -196,6 +196,223 @@ The Database project is the foundation for:
 - **Services Layer**: Implements business logic using repositories
 - **API Layer**: Exposes REST endpoints to clients
 
+---
+
+# Repository Layer
+
+A comprehensive data access abstraction layer implementing the **Repository Pattern** and **Unit of Work Pattern**, providing clean separation of concerns and testability for the Garment Factory Management System.
+
+## 📋 Overview
+
+The **Repository** project provides a robust abstraction over the Entity Framework Core DbContext, enabling:
+
+- **Decoupled Data Access**: Isolates business logic from database implementation details
+- **Reusable Patterns**: Generic repository for common CRUD operations
+- **Unit of Work**: Coordinated transaction management across multiple repositories
+- **Testability**: Easy to mock repositories for unit testing
+- **Consistency**: Centralized query logic and data manipulation
+
+## 🏗️ Project Structure
+
+```
+Repository/
+├── Interfaces/
+│   ├── IGenericRepository.cs        # Base interface for all repositories
+│   ├── IUnitOfWork.cs               # Unit of work coordinator interface
+│   ├── IAdvanceAndDeductionRepository.cs
+│   ├── IAuthRepository.cs
+│   ├── IExpenseRepository.cs
+│   ├── IFabricRepository.cs
+│   ├── IModelRepository.cs
+│   ├── IOrderModelRepository.cs
+│   ├── IOrderRepository.cs
+│   ├── IPhoneRepository.cs
+│   ├── IRevenueRepository.cs
+│   ├── ITraderRepository.cs
+│   └── IWorkerRepository.cs
+├── Implementations/
+│   ├── GenericRepository.cs         # Base implementation for all repositories
+│   ├── UnitOfWork.cs                # Unit of work implementation
+│   ├── AdvanceAndDeductionRepository.cs
+│   ├── AuthRepository.cs
+│   ├── ExpenseRepository.cs
+│   ├── FabricRepository.cs
+│   ├── ModelRepository.cs
+│   ├── OrderModelRepository.cs
+│   ├── OrderRepository.cs
+│   ├── PhoneRepository.cs
+│   ├── RevenueRepository.cs
+│   ├── TraderRepository.cs
+│   └── WorkerRepository.cs
+└── Extensions/
+    └── RepositoryServiceExtensions.cs   # Dependency injection setup
+```
+
+## 🔄 Design Patterns
+
+### Generic Repository Pattern
+
+The `IGenericRepository<T>` interface provides common CRUD operations:
+
+```csharp
+IGenericRepository<T> : IDisposable
+{
+    Task<T> GetByIdAsync(int id);
+    Task<IEnumerable<T>> GetAllAsync();
+    Task<bool> AddAsync(T entity);
+    Task<bool> UpdateAsync(T entity);
+    Task<bool> DeleteAsync(T entity);
+    Task<int> SaveChangesAsync();
+}
+```
+
+**Benefits**:
+
+- Eliminates repetitive boilerplate code
+- Provides consistent CRUD interface across all entities
+- Easy to extend for specific entity needs
+
+### Unit of Work Pattern
+
+The `IUnitOfWork` interface coordinates multiple repositories:
+
+```csharp
+IUnitOfWork
+{
+    IAdvanceAndDeductionRepository AdvanceAndDeductionRepository { get; }
+    IExpenseRepository ExpenseRepository { get; }
+    IFabricRepository FabricRepository { get; }
+    IModelRepository ModelRepository { get; }
+    IOrderRepository OrderRepository { get; }
+    IOrderModelRepository OrderModelRepository { get; }
+    IRevenueRepository RevenueRepository { get; }
+    ITraderRepository TraderRepository { get; }
+    IWorkerRepository WorkerRepository { get; }
+    IPhoneRepository PhoneRepository { get; }
+
+    Task<int> SaveChangesAsync();
+    Task<bool> BeginTransactionAsync();
+    Task<bool> CommitTransactionAsync();
+    Task<bool> RollbackTransactionAsync();
+}
+```
+
+**Benefits**:
+
+- Single entry point for data access operations
+- Atomic operations with transaction support
+- Simplified dependency injection (one interface instead of many)
+- Coordinated SaveChanges across multiple repositories
+
+## 📊 Repository Types
+
+| Repository                        | Purpose                             | Key Features                           |
+| --------------------------------- | ----------------------------------- | -------------------------------------- |
+| **GenericRepository**             | Base CRUD operations for any entity | Async/await, IQueryable support        |
+| **AuthRepository**                | Authentication & user operations    | Login, registration, token management  |
+| **OrderRepository**               | Order-specific queries & operations | Order filtering, status updates        |
+| **WorkerRepository**              | Employee data access                | Worker searches, salary tracking       |
+| **ExpenseRepository**             | Business expense operations         | Expense filtering, reporting           |
+| **RevenueRepository**             | Revenue tracking & queries          | Revenue calculations, reporting        |
+| **FabricRepository**              | Fabric inventory management         | Stock tracking, material queries       |
+| **TraderRepository**              | Business partner operations         | Trader searches, contact management    |
+| **AdvanceAndDeductionRepository** | Employee financial operations       | Advance tracking, deduction management |
+| **ModelRepository**               | Garment model catalog access        | Model searches, design queries         |
+| **OrderModelRepository**          | Order line item operations          | Order detail access                    |
+| **PhoneRepository**               | Contact information access          | Phone lookups, updates                 |
+
+## 🔧 Technology Stack
+
+- **.NET Framework**: .NET 10.0
+- **Pattern**: Repository & Unit of Work
+- **Dependency Injection**: Microsoft.Extensions.DependencyInjection
+- **Async Support**: Full async/await implementation
+
+## 🚀 Getting Started
+
+### Dependency Injection Setup
+
+The `RepositoryServiceExtensions` class provides DI configuration:
+
+```csharp
+// In your Startup.cs or Program.cs
+services.AddRepositoryServices(configuration);
+```
+
+This extension method registers:
+
+- `IUnitOfWork` → `UnitOfWork` (Scoped lifetime)
+- All specialized repositories
+- Generic repository factory
+
+### Using Repositories in Services
+
+```csharp
+public class OrderService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public OrderService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<Order> GetOrderAsync(int orderId)
+    {
+        return await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
+    }
+
+    public async Task<bool> CreateOrderAsync(Order order)
+    {
+        await _unitOfWork.OrderRepository.AddAsync(order);
+        return await _unitOfWork.SaveChangesAsync() > 0;
+    }
+}
+```
+
+### Transaction Management
+
+```csharp
+public async Task<bool> UpdateOrderWithItemsAsync(Order order, List<OrderModel> items)
+{
+    try
+    {
+        await _unitOfWork.BeginTransactionAsync();
+
+        await _unitOfWork.OrderRepository.UpdateAsync(order);
+        foreach (var item in items)
+        {
+            await _unitOfWork.OrderModelRepository.AddAsync(item);
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+        return await _unitOfWork.CommitTransactionAsync();
+    }
+    catch
+    {
+        await _unitOfWork.RollbackTransactionAsync();
+        return false;
+    }
+}
+```
+
+## 💡 Best Practices
+
+1. **Always use Unit of Work** for coordinated operations across multiple entities
+2. **Implement specific repositories** only when you need custom query logic beyond GenericRepository
+3. **Keep repositories focused** on data access concerns—business logic goes in services
+4. **Use async/await** consistently throughout your repository layer
+5. **Leverage transactions** for operations that must succeed or fail together
+6. **Mock repositories** in unit tests using the interfaces
+
+## 🔗 Integration
+
+The Repository layer integrates with:
+
+- **Database Layer**: Uses AppDbContext for DbSet access
+- **Services Layer**: Consumed by business logic implementations
+- **API Layer**: Services expose repository functionality via endpoints
+
 ## 📞 Support & Contribution
 
 For issues, questions, or contributions related to the database schema and models, please refer to the main project documentation.
