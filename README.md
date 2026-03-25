@@ -198,7 +198,7 @@ The Database project is the foundation for:
 
 ---
 
-# Repository Layer
+# Repository
 
 A comprehensive data access abstraction layer implementing the **Repository Pattern** and **Unit of Work Pattern**, providing clean separation of concerns and testability for the Garment Factory Management System.
 
