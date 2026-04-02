@@ -62,38 +62,38 @@ The **Garment Factory Management System** is an enterprise-class REST API design
 The system implements a **Clean Layered Architecture** with strict separation of concerns:
 
 ```
-┌───────────────────────────────────────────────────────┐
-│                   API Layer                           │
-│  Controllers, OpenAPI, JWT Auth, HTTP Handling       │
+┌─────────────────────────────────────────────────────┐
+│                   API Layer                         │
+│  Controllers, OpenAPI, JWT Auth, HTTP Handling      │
 └────────────────────────┬────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────┐
-│                  Services Layer                      │
-│  Business Rules, Validations, Orchestration          │
-│  - Authentication Service                            │
-│  - Order Service                                      │
-│  - Inventory Service                                  │
-│  - Worker Management Service                          │
-│  - Financial Tracking Service                         │
+│                  Services Layer                     │
+│  Business Rules, Validations, Orchestration         │
+│  - Authentication Service                           │
+│  - Order Service                                    │
+│  - Inventory Service                                │
+│  - Worker Management Service                        │
+│  - Financial Tracking Service                       │
 └────────────────────────┬────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────┐
-│              Repository Layer                        │
-│  Unit of Work, Generic CRUD Pattern                  │
-│  - Order Repository     - Expense Repository         │
-│  - Worker Repository    - Revenue Repository         │
-│  - Fabric Repository    - Trader Repository          │
+│              Repository Layer                       │
+│  Unit of Work, Generic CRUD Pattern                 │
+│  - Order Repository     - Expense Repository        │
+│  - Worker Repository    - Revenue Repository        │
+│  - Fabric Repository    - Trader Repository         │
 └────────────────────────┬────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────┐
-│               Database Layer                         │
-│  EF Core Models, DbContext, Migrations               │
-│  - 13 Domain Models                                  │
-│  - ASP.NET Core Identity Integration                 │
-│  - 2 Migration Versions                              │
+│               Database Layer                        │
+│  EF Core Models, DbContext, Migrations              │
+│  - 13 Domain Models                                 │
+│  - ASP.NET Core Identity Integration                │
+│  - 2 Migration Versions                             │
 └────────────────────────┬────────────────────────────┘
                          │
-                    ┌────┴───────┐
+                    ┌────┴────────┐
                     │ SQL Server  │
                     │ Database    │
                     └─────────────┘
@@ -316,13 +316,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Worker> Workers { get; set; }
     public DbSet<Fabric> Fabrics { get; set; }
     // ... additional DbSets
-    
-    // Automatic user tracking on save
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        // Auto-populate user for owned entities
-        return await base.SaveChangesAsync(cancellationToken);
-    }
 }
 ```
 
