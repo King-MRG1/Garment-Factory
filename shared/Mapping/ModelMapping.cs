@@ -15,7 +15,8 @@ namespace Shared.Mapping
             {
                 Id = model.Id,
                 Model_Name = model.Model_Name,
-                Price_Trader = model.Price_Trader,
+                Price_Trader_Cash = model.Price_Trader_Cash,
+                Price_Trader_Rent = model.Price_Trader_Rent,
                 Price_Stitcher = model.Price_Stitcher,
                 Price_Iron = model.Price_Ironer,
                 Price_Cutter = model.Price_Cutter,
@@ -35,7 +36,8 @@ namespace Shared.Mapping
             return new Model
             {
                 Model_Name = createModelDto.Model_Name,
-                Price_Trader = createModelDto.Price_Trader,
+                Price_Trader_Cash = createModelDto.Price_Trader_Cash,
+                Price_Trader_Rent = createModelDto.Price_Trader_Rent,
                 Price_Stitcher = createModelDto.Price_Stitcher,
                 Price_Ironer = createModelDto.Price_Iron,
                 Price_Cutter = createModelDto.Price_Cutter,
@@ -45,7 +47,8 @@ namespace Shared.Mapping
         public static void UpdateModel(this Model model, UpdateModelDto updateModelDto)
         {
             model.Model_Name = updateModelDto.Model_Name;
-            model.Price_Trader = updateModelDto.Price_Trader;
+            model.Price_Trader_Cash = updateModelDto.Price_Trader_Cash;
+            model.Price_Trader_Rent = updateModelDto.Price_Trader_Rent;
             model.Price_Stitcher = updateModelDto.Price_Stitcher;
             model.Price_Ironer = updateModelDto.Price_Iron;
             model.Price_Cutter = updateModelDto.Price_Cutter;

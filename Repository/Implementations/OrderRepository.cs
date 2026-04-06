@@ -44,6 +44,7 @@ namespace Repository.Implementations
 
             return orders;
         }
+
         public async Task<IEnumerable<Order>> GetOrdersByModelIdAsync(int modelId)
         {
             var orders = await _context.Orders
@@ -54,6 +55,26 @@ namespace Repository.Implementations
                 .ToListAsync();
 
             return orders;
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersByFilterAsync(string traderName, string modelName)
+        {
+           var query = _context.Orders
+                .Include(o => o.Trader)
+                .Include(o => o.OrderModels)
+                .ThenInclude(om => om.Model)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(traderName))
+            {
+                query = query.Where(o => o.Trader.Trader_Name.Contains(traderName));
+            }
+
+            if (!string.IsNullOrEmpty(modelName))
+            {
+                query = query.Where(o => o.OrderModels.Any(om => om.Model.Model_Name.Contains(modelName)));
+            }
+            return await query.ToListAsync();
         }
     }
 }

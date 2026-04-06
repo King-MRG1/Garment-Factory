@@ -6,9 +6,7 @@ namespace Repository.Interfaces
         ITraderRepository Traders { get; }
         IWorkerRepository Workers { get; }
         IOrderRepository Orders { get; }
-        IOrderModelRepository OrderModels { get; }
         IFabricRepository Fabrics { get; }
-        IPhoneRepository Phones { get; }
         IRevenueRepository Revenues { get; }
         IExpenseRepository Expenses { get; }
         IAdvanceAndDeductionRepository AdvanceAndDeductions { get; }

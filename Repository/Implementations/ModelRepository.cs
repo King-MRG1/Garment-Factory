@@ -32,15 +32,17 @@ namespace Repository.Implementations
             return model;
         }
 
-        public async Task<IEnumerable<Model>> GetModelByNameAsync(string name)
+        public async Task<IEnumerable<Model>> GetModelsByFilterAsync(string? modelName)
         {
-            var models = await _context.Models
-                 .Include(m => m.OrderModels)
-                 .ThenInclude(om => om.Order)
-                 .Where(m => m.Model_Name.Contains(name))
-                 .ToListAsync();
+            var query = _context.Models
+                .Include(m => m.OrderModels)
+                .ThenInclude(om => om.Order)
+                .AsQueryable();
 
-            return models;
+            if (!string.IsNullOrEmpty(modelName))
+                query = query.Where(m => m.Model_Name.Contains(modelName));
+
+            return await query.ToListAsync();
         }
 
         public async Task<IEnumerable<Model>> GetModelsByIdsAsync(List<int> ids)

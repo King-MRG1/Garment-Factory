@@ -20,6 +20,18 @@ namespace Repository.Implementations
             return AdvanceOrDeduction;
         }
 
+        public async Task<IEnumerable<AdvanceAndDeduction>> GetAdvancesAndDeductionsByFilterAsync(int type)
+        {
+            var query = _context.AdvanceAndDeductions
+                .Include(a => a.Worker)
+                .AsQueryable(); 
+
+            if(type != 0)
+                query = query.Where(a => a.Type == (AdvanceOrDeduction)type);
+
+            return await query.ToListAsync();
+        }
+
         public async Task<IEnumerable<AdvanceAndDeduction>> GetAllAdvanceAndDeductionsAsync()
         {
             var AdvanceOrDeductions = await _context.AdvanceAndDeductions

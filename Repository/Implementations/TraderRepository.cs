@@ -62,5 +62,28 @@ namespace Repository.Implementations
 
             return traders;
         }
+
+        public async Task<IEnumerable<Trader>> GetTradersByFilterAsync(string? name, int? type)
+        {
+            var query = _context.Traders
+                .Include(Trader => Trader.Phones)
+                .Include(Trader => Trader.Fabrics)
+                .Include(Trader => Trader.Revenues)
+                .Include(Trader => Trader.Expenses)
+                .Include(Trader => Trader.Orders)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(t => t.Trader_Name.Contains(name));
+            }
+
+            if(type >= 0)
+            {
+                query = query.Where(t => t.Trader_Type == (TraderType)type);
+            }
+
+            return await query.ToListAsync();
+        }
     }
 }

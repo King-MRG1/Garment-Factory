@@ -11,7 +11,9 @@ namespace Shared.Dtos.ModelDtos
         [Required]
         public string Model_Name { get; set; }
         [Range(0.01, double.MaxValue)]
-        public decimal Price_Trader { get; set; }
+        public decimal Price_Trader_Cash { get; set; }
+        [Range(0.01, double.MaxValue)]
+        public decimal Price_Trader_Rent { get; set; }
         [Range(0.01, double.MaxValue)]
         public decimal Price_Stitcher { get; set; }
         [Range(0.01, double.MaxValue)]

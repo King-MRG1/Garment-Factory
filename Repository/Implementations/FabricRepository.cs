@@ -24,6 +24,33 @@ namespace Repository.Implementations
             return fabrics;
         }
 
+        public async Task<IEnumerable<Fabric>> GetFabricsByFillterAsync(string fabricName, string traderName, DateOnly? startDate, DateOnly? endDate)
+        {
+            var query = _context.Fabrics.Include(f => f.Trader).AsQueryable();
+
+            if (!string.IsNullOrEmpty(fabricName))
+            {
+                query = query.Where(f => f.Fabric_Name.Contains(fabricName));
+            }
+
+            if (!string.IsNullOrEmpty(traderName))
+            {
+                query = query.Where(f => f.Trader.Trader_Name.Contains(traderName));
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(f => f.DateAdded >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(f => f.DateAdded <= endDate.Value);
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<IEnumerable<Fabric>> GetFabricsByNameAsync(string name)
         {
             var fabrics = await _context.Fabrics.Where(f => f.Fabric_Name.Contains(name)).ToListAsync();
@@ -31,9 +58,10 @@ namespace Repository.Implementations
             return fabrics;
         }
 
-        public async Task<IEnumerable<Fabric>> GetFabricsByTraderIdAsync(int traderId)
+        public async Task<IEnumerable<Fabric>> GetFabricsByTraderNameAsync(string traderName)
         {
-            var fabrics = await _context.Fabrics.Where(f => f.Trader_Id == traderId).ToListAsync(); 
+            var fabrics = await _context.Fabrics.Include(f => f.Trader)
+                .Where(f => f.Trader.Trader_Name.Contains(traderName)).ToListAsync(); 
             return fabrics;
         }
 

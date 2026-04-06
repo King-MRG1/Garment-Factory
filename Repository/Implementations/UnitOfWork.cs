@@ -11,9 +11,7 @@ namespace Repository.Implementations
         private ITraderRepository? _traders;
         private IWorkerRepository? _workers;
         private IOrderRepository? _orders;
-        private IOrderModelRepository? _orderModels;
         private IFabricRepository? _fabrics;
-        private IPhoneRepository? _phones;
         private IRevenueRepository? _revenues;
         private IExpenseRepository? _expenses;
         private IAdvanceAndDeductionRepository? _advanceAndDeductions;
@@ -28,9 +26,7 @@ namespace Repository.Implementations
         public ITraderRepository Traders => _traders ??= new TraderRepository(_context);
         public IWorkerRepository Workers => _workers ??= new WorkerRepository(_context);
         public IOrderRepository Orders => _orders ??= new OrderRepository(_context);
-        public IOrderModelRepository OrderModels => _orderModels ??= new OrderModelRepository(_context);
         public IFabricRepository Fabrics => _fabrics ??= new FabricRepository(_context);
-        public IPhoneRepository Phones => _phones ??= new PhoneRepository(_context);
         public IRevenueRepository Revenues => _revenues ??= new RevenueRepository(_context);
         public IExpenseRepository Expenses => _expenses ??= new ExpenseRepository(_context);
         public IAdvanceAndDeductionRepository AdvanceAndDeductions => _advanceAndDeductions ??= new AdvanceAndDeductionRepository(_context);

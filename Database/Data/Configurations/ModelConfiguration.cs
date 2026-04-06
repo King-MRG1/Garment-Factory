@@ -15,7 +15,11 @@ namespace Database.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(m => m.Price_Trader)
+            builder.Property(m => m.Price_Trader_Cash)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
+
+            builder.Property(m => m.Price_Trader_Rent)
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
 

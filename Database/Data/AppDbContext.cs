@@ -1,3 +1,4 @@
+using Database.Data.Configurations;
 using Database.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -34,24 +35,10 @@ namespace Database.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-            foreach (var entityType in builder.Model.GetEntityTypes())
-            {
-                if (typeof(IUserOwned).IsAssignableFrom(entityType.ClrType))
-                {
-                    var parameter = Expression.Parameter(entityType.ClrType, "e");
-                    var property = Expression.Property(parameter, nameof(IUserOwned.UserId));
-                    var contextConstant = Expression.Constant(this);
-                    var userIdExpression = Expression.Property(contextConstant, nameof(CurrentUserId));
-                    var filter = Expression.Lambda(
-                        Expression.Equal(property,
-                            Expression.Constant(CurrentUserId, typeof(string))),
-                        parameter);
-
-                    builder.Entity(entityType.ClrType).HasQueryFilter(filter);
-                }
-            }
+            builder.AddMultiTenantFilters(() => CurrentUserId);
         }
     }
 }

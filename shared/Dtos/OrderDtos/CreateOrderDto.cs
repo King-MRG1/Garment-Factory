@@ -13,5 +13,7 @@ namespace Shared.Dtos.OrderDtos
         [Required]
         [MinLength(1, ErrorMessage = "Order must have at least one model")]
         public List<OrderModelDto> OrderModels { get; set; } = new List<OrderModelDto>();
+        [Required]
+        public bool Is_Rental { get; set; }
     }
 }

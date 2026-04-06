@@ -25,6 +25,18 @@ namespace Repository.Implementations
             return revenue;
         }
 
+        public async Task<IEnumerable<Revenue>> GetRevenuesByFilterAsync(string? traderName)
+        {
+            var query = _context.Revenues.Include(r => r.Trader).AsQueryable();
+
+            if (!string.IsNullOrEmpty(traderName))
+            {
+                query = query.Where(r => r.Trader != null && r.Trader.Trader_Name.Contains(traderName));
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<IEnumerable<Revenue>> GetRevenuesByTraderIdAsync(int traderId)
         {
             var revenues = await _context.Revenues.Include(r => r.Trader)
