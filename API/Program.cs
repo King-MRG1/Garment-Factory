@@ -1,6 +1,5 @@
 using Database.Data;
 using Database.Models;
-//using Database.Data.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -35,14 +34,11 @@ namespace API
                     {
                         document.Components = new OpenApiComponents();
                     }
-
-                    // ✅ Initialize SecuritySchemes if null
                     if (document.Components.SecuritySchemes == null)
                     {
                         document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>();
                     }
 
-                    // ✅ Now safely add Bearer scheme
                     document.Components.SecuritySchemes.Add("Bearer", new OpenApiSecurityScheme
                     {
                         Name = "Authorization",

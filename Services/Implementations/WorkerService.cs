@@ -1,6 +1,7 @@
 ﻿using Database.Models;
 using Repository.Interfaces;
 using Services.Interfaces;
+using Shared.Dtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.ReportsDtos;
 using Shared.Dtos.WorkerDtos;
@@ -197,14 +198,14 @@ namespace Services.Implementations
             return paymentReport;
         }
 
-        public IEnumerable<object> GetWorkerTypes()
+        public async Task<IEnumerable<ViewEnumDto>> GetWorkerTypesAsync()
         {
             var types = EnumHelper.GetEnumList<WorkerType>();
 
             return types;
         }
 
-        public async Task<IEnumerable<ViewWorkerDto>> GetWorkersByFilter(WorkerFilter workerFilter)
+        public async Task<IEnumerable<ViewWorkerDto>> GetWorkersByFilterAsync(WorkerFilter workerFilter)
         {
             var workers = await _unitOfWork.Workers.GetWorkersByFilterAsync(
                 workerName: workerFilter.WorkerName,

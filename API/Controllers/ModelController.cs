@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using Shared.Dtos.ModelDtos;
+using Shared.Dtos.QueryFilters;
 
 namespace API.Controllers
 {
@@ -17,7 +18,15 @@ namespace API.Controllers
             _unitOfServices = unitOfServices;
         }
 
-        [HttpGet("/{id}")]
+        [HttpGet]
+        public async Task<IActionResult> GetModels([FromQuery] ModelFilter modelFilter)
+        {
+            var models = await _unitOfServices.Models.GetModelsByFilterAsync(modelFilter);
+
+            return Ok(models);
+        }
+
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetModelById(int id)
         {
             var model = await _unitOfServices.Models.GetModelByIdAsync(id);
@@ -27,6 +36,7 @@ namespace API.Controllers
 
             return Ok(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateModel([FromBody] CreateModelDto createModelDto)
         {
@@ -40,6 +50,7 @@ namespace API.Controllers
 
             return CreatedAtAction(nameof(GetModelById), new { id = createdModel.Id }, createdModel);
         }
+
         [HttpPut("/{id}")]
         public async Task<IActionResult> UpdateModel(int id, [FromBody] UpdateModelDto updateModelDto)
         {
@@ -52,10 +63,12 @@ namespace API.Controllers
 
             return Ok(updatedModel);
         }
+
         [HttpDelete("/{id}")]
         public async Task<IActionResult> DeleteModel(int id)
         {
             var deletedModel = await _unitOfServices.Models.DeleteModelAsync(id);
+
             if (deletedModel == null)
                 return NotFound();
 

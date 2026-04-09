@@ -26,7 +26,7 @@ namespace API.Controllers
             return Ok(fabrics);
         }
 
-        [HttpGet("Fabrics")]
+        [HttpGet]
         public async Task<IActionResult> GetFabrics([FromQuery] FabricFilter fabricFilter)
         {
             var fabrics = await _unitOfServices.Fabrics.GetFabricsByFilterAsync(fabricFilter);
@@ -76,9 +76,9 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFabric(int id)
         {
-            var result = await _unitOfServices.Fabrics.DeleteFabricAsync(id);
+            var deletedFabric = await _unitOfServices.Fabrics.DeleteFabricAsync(id);
 
-            if (result == null)
+            if (deletedFabric == null)
                 return NotFound();
 
             return Ok("Fabric deleted successfully");
@@ -86,4 +86,3 @@ namespace API.Controllers
         }
     }
 }
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImE4ZTBhMjE3LWEyMzctNDA4ZS1hMWM5LTEyNWMzODM4MDkxMyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJLaW5nLU1SRyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6IktpbmctTVJHQGdhcm1lbnRmYWN0b3J5LmNvbSIsIkZ1bGxOYW1lIjoiTW9oYW1lZCBSYW1hZGFuIiwiUGhvbmVOdW1iZXIiOiIwMTE1MDQ2ODc5MSIsImV4cCI6MTc3NTUwMDQ0OSwiaXNzIjoiR2FybWVudEZhY3RvcnlBUEkiLCJhdWQiOiJHYXJtZW50RmFjdG9yeVVzZXJzIn0.Y4dfI-2CWwBoQFZ4_zsoCuBTl0aqeUkfBN2syyFxedw

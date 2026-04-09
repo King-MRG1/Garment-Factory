@@ -2,6 +2,7 @@
 using Microsoft.Identity.Client;
 using Repository.Interfaces;
 using Services.Interfaces;
+using Shared.Dtos;
 using Shared.Dtos.OrderDtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.TraderDtos;
@@ -20,7 +21,7 @@ namespace Services.Implementations
             _currentUserService = currentUserService;
         }
 
-        public async Task<ViewTraderDto?> AddTrader(CreateTraderDto createTraderDto)
+        public async Task<ViewTraderDto?> AddTraderAsync(CreateTraderDto createTraderDto)
         {
             var trader = createTraderDto.ToTrader();
 
@@ -39,7 +40,7 @@ namespace Services.Implementations
             return trader.ToTraderDto();
         }
 
-        public async Task<ViewTraderDto?> DeleteTrader(int id)
+        public async Task<ViewTraderDto?> DeleteTraderAsync(int id)
         {
             var trader = await _unitOfWork.Traders.GetByIdAsync(id);
 
@@ -52,14 +53,14 @@ namespace Services.Implementations
             return trader.ToTraderDto();
         }
 
-        public async Task<IEnumerable<ViewTraderDto>> GetAllTraders()
+        public async Task<IEnumerable<ViewTraderDto>> GetAllTradersAsync()
         {
             var traders = await _unitOfWork.Traders.GetAllAsync();
 
             return traders.Select(trader => trader.ToTraderDto());
         }
 
-        public async Task<ViewTraderDto?> GetTrader(int id)
+        public async Task<ViewTraderDto?> GetTraderByIdAsync(int id)
         {
             var trader = await _unitOfWork.Traders.GetByIdAsync(id);
 
@@ -69,7 +70,7 @@ namespace Services.Implementations
             return trader.ToTraderDto();
         }
 
-        public async Task<IEnumerable<ViewTraderDto>> GetTradersByFilter(TraderFilter traderFilter)
+        public async Task<IEnumerable<ViewTraderDto>> GetTradersByFilterAsync(TraderFilter traderFilter)
         {
             var traders = await _unitOfWork.Traders.GetTradersByFilterAsync(
                 traderName: traderFilter.TraderName,
@@ -78,28 +79,28 @@ namespace Services.Implementations
             return traders.Select(trader => trader.ToTraderDto());
         }
 
-        public async Task<IEnumerable<ViewTraderDto>> GetTradersByName(string name)
+        public async Task<IEnumerable<ViewTraderDto>> GetTradersByNameAsync(string name)
         {
             var traders = await _unitOfWork.Traders.GetTraderByNameAsync(name);
 
             return traders.Select(trader => trader.ToTraderDto());
         }
 
-        public async Task<IEnumerable<ViewTraderDto>> GetTradersByType(TraderType traderType)
+        public async Task<IEnumerable<ViewTraderDto>> GetTradersByTypeAsync(TraderType traderType)
         {
             var traders = await _unitOfWork.Traders.GetTraderByTypeAsync(traderType);
 
             return traders.Select(trader => trader.ToTraderDto());
         }
 
-        public IEnumerable<object> GetTraderTypes()
+        public async Task<IEnumerable<ViewEnumDto>> GetTraderTypesAsync()
         {
-           var types = EnumHelper.GetEnumList<TraderType>();
+           var types =  EnumHelper.GetEnumList<TraderType>();
 
             return types;
         }
 
-        public async Task<ViewTraderDto?> UpdateTrader(int id, UpdateTraderDto updateTraderDto)
+        public async Task<ViewTraderDto?> UpdateTraderAsync(int id, UpdateTraderDto updateTraderDto)
         {
             var trader = await _unitOfWork.Traders.GetByIdAsync(id);
 
