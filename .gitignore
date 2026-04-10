@@ -13,3 +13,4 @@ project.nuget.cache
 
 # Logs
 *.log
+/ENDPOINTS.md
