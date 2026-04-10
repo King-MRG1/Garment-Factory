@@ -119,10 +119,10 @@ namespace Services.Implementations
                 .FindAsync(ad => ad.Worker_Id == workerId);
             var itemIds = items.Select(i => i.Id).ToList();
 
-            var totalAdvances = items.Where(ad => ad.Type == AdvanceOrDeduction.Advance)
+            var totalAdvances = items.Where(ad => ad.Type == AdvanceOrDeduction.Advance && !ad.IsUsed)
                                        .Sum(ad => ad.Amount);
 
-            var totalDeductions = items.Where(ad => ad.Type == AdvanceOrDeduction.Deduction)
+            var totalDeductions = items.Where(ad => ad.Type == AdvanceOrDeduction.Deduction && !ad.IsUsed)
                                        .Sum(ad => ad.Amount);
 
             await _unitOfWork.AdvanceAndDeductions.MakeAdvanceAndDeductionUsed(itemIds);
