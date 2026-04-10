@@ -64,13 +64,6 @@ namespace Services.Implementations
             return model.ToModelDto();
         }
 
-        public async Task<IEnumerable<ViewModelDto>> GetAllModelsAsync()
-        {
-            var models = await _unitOfWork.Models.GetAllModelsAsync();
-
-            return models.Select(m => m.ToModelDto());
-        }
-
         public async Task<ViewModelDto?> GetModelByIdAsync(int id)
         {
             var model = await _unitOfWork.Models.GetByIdAsync(id);
@@ -94,6 +87,13 @@ namespace Services.Implementations
             await _unitOfWork.SaveChangesAsync();
 
             return model.ToModelDto();
+        }
+
+        public async Task<IEnumerable<ViewModelDto>> GetAllModelsAsync()
+        {
+            var models = await _unitOfWork.Models.GetAllModelsAsync();
+
+            return models.Select(m => m.ToModelDto());
         }
 
         public async Task<IEnumerable<ViewModelDto>> GetModelsByFilterAsync(ModelFilter modelFilter)

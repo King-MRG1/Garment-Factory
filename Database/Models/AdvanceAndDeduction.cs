@@ -10,6 +10,7 @@ namespace Database.Models
         public decimal Amount { get; set; }
         public string Description { get; set; }
         public AdvanceOrDeduction Type { get; set; }
+        public bool IsUsed { get; set; }
         public DateOnly Date { get; set; }
         public int Worker_Id { get; set; }
         public Worker Worker { get; set; }

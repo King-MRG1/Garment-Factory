@@ -62,40 +62,40 @@ The **Garment Factory Management System** is an enterprise-class REST API design
 The system implements a **Clean Layered Architecture** with strict separation of concerns:
 
 ```
-┌───────────────────────────────────────────────────────┐
-│                   API Layer                           │
-│  Controllers, OpenAPI, JWT Auth, HTTP Handling       │
+┌─────────────────────────────────────────────────────┐
+│                   API Layer                         │
+│  Controllers, OpenAPI, JWT Auth, HTTP Handling      │
 └────────────────────────┬────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────┐
-│                  Services Layer                      │
-│  Business Rules, Validations, Orchestration          │
-│  - Authentication Service                            │
-│  - Order Service                                      │
-│  - Inventory Service                                  │
-│  - Worker Management Service                          │
-│  - Financial Tracking Service                         │
+│                  Services Layer                     │
+│  Business Rules, Validations, Orchestration         │
+│  - Authentication Service                           │
+│  - Order Service                                    │
+│  - Inventory Service                                │
+│  - Worker Management Service                        │
+│  - Financial Tracking Service                       │
 └────────────────────────┬────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────┐
-│              Repository Layer                        │
-│  Unit of Work, Generic CRUD Pattern                  │
-│  - Order Repository     - Expense Repository         │
-│  - Worker Repository    - Revenue Repository         │
-│  - Fabric Repository    - Trader Repository          │
+│              Repository Layer                       │
+│  Unit of Work, Generic CRUD Pattern                 │
+│  - Order Repository     - Expense Repository        │
+│  - Worker Repository    - Revenue Repository        │
+│  - Fabric Repository    - Trader Repository         │
 └────────────────────────┬────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────┐
-│               Database Layer                         │
-│  EF Core Models, DbContext, Migrations               │
-│  - 13 Domain Models                                  │
-│  - ASP.NET Core Identity Integration                 │
-│  - 2 Migration Versions                              │
+│               Database Layer                        │
+│  EF Core Models, DbContext, Migrations              │
+│  - 13 Domain Models                                 │
+│  - ASP.NET Core Identity Integration                │
+│  - 2 Migration Versions                             │
 └────────────────────────┬────────────────────────────┘
                          │
-                    ┌────┴───────┐
-                    │ SQL Server  │
-                    │ Database    │
+                    ┌────┴────────┐
+                    │  SQL Server │
+                    │  Database   │
                     └─────────────┘
 
 Shared Layer (Cross-Cutting)
@@ -1221,56 +1221,134 @@ public class OrdersController : ControllerBase
 
 ---
 
-## API Documentation
+## API Endpoints & Documentation
 
-### OpenAPI (Swagger) Integration
+### OpenAPI (Scalar) Integration
 
 The API includes OpenAPI 3.0 support via **Scalar** for interactive documentation.
 
-**Features:**
-- ✅ Interactive endpoint testing
-- ✅ Request/response schema visualization
-- ✅ Authentication testing
-- ✅ Real-time API exploration
-
 **Access Points:**
-- OpenAPI JSON: `/openapi/v1.json`
-- Scalar UI: `/scalar/v1`
-- Traditional Swagger UI: Available via additional package
+- 📖 **Interactive Docs**: `/scalar/v1` (Development)
+- 📋 **OpenAPI JSON**: `/openapi/v1.json`
 
-### Example API Endpoints (To Be Implemented)
+**Features:**
+- ✅ Interactive endpoint testing with live requests
+- ✅ Request/response schema visualization
+- ✅ JWT token authentication testing
+- ✅ Real-time API exploration
+- ✅ Parameter validation
+
+### Complete API Endpoints Reference
+
+📚 **Comprehensive endpoint documentation** with request/response examples is available in [ENDPOINTS.md](ENDPOINTS.md)
+
+### Quick Endpoint Overview
+
+#### 🔐 Authentication Endpoints (`/api/account`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/Register` | POST | ❌ No | Register new user |
+| `/Login` | POST | ❌ No | Login and get JWT tokens |
+| `/RefreshToken` | GET | ❌ No | Refresh access token |
+| `/Logout` | GET | ✅ Yes | Logout and revoke token |
+
+#### 📦 Order Management (`/api/order`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/` | GET | ✅ Yes | Get all orders (with filters) |
+| `/{id}` | GET | ✅ Yes | Get order by ID |
+| `/` | POST | ✅ Yes | Create new order |
+| `/{id}` | PUT | ✅ Yes | Update order |
+| `/{id}` | DELETE | ✅ Yes | Delete order |
+
+#### 👷 Worker Management (`/api/worker`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/` | GET | ✅ Yes | Get all workers (with filters) |
+| `/types` | GET | ✅ Yes | Get worker types |
+| `/{id}` | GET | ✅ Yes | Get worker by ID |
+| `/weekly-payment` | POST | ✅ Yes | Generate weekly payment report |
+| `/` | POST | ✅ Yes | Create new worker |
+| `/{id}` | PUT | ✅ Yes | Update worker |
+| `/{id}` | DELETE | ✅ Yes | Delete worker |
+
+#### 🧵 Fabric Inventory (`/api/fabric`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/FabricReport` | GET | ✅ Yes | Get fabric usage report by date range |
+| `/` | GET | ✅ Yes | Get all fabrics (with filters) |
+| `/{id}` | GET | ✅ Yes | Get fabric by ID |
+| `/` | POST | ✅ Yes | Create new fabric |
+| `/{id}` | PUT | ✅ Yes | Update fabric |
+| `/{id}` | DELETE | ✅ Yes | Delete fabric |
+
+#### 💰 Expense Tracking (`/api/expense`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/` | GET | ✅ Yes | Get all expenses (with filters) |
+| `/{id}` | GET | ✅ Yes | Get expense by ID |
+| `/` | POST | ✅ Yes | Add new expense |
+| `/{id}` | PUT | ✅ Yes | Update expense |
+| `/?id={id}` | DELETE | ✅ Yes | Delete expense |
+
+#### 💵 Revenue Tracking (`/api/revenue`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/` | GET | ✅ Yes | Get all revenues (with filters) |
+| `/{id}` | GET | ✅ Yes | Get revenue by ID |
+| `/` | POST | ✅ Yes | Create new revenue entry |
+| `/{id}` | PUT | ✅ Yes | Update revenue |
+| `/{id}` | DELETE | ✅ Yes | Delete revenue |
+
+#### 🤝 Trader Management (`/api/trader`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/` | GET | ✅ Yes | Get all traders (with filters) |
+| `/types` | GET | ✅ Yes | Get trader types |
+| `/{id}` | GET | ✅ Yes | Get trader by ID |
+| `/` | POST | ✅ Yes | Add new trader |
+| `/{id}` | PUT | ✅ Yes | Update trader |
+| `/{id}` | DELETE | ✅ Yes | Delete trader |
+
+#### 📊 Advances & Deductions (`/api/advanceanddeduction`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/` | GET | ✅ Yes | Get advances/deductions (with filters) |
+| `/types` | GET | ✅ Yes | Get record types |
+| `/{id}` | GET | ✅ Yes | Get record by ID |
+| `/` | POST | ✅ Yes | Create advance/deduction |
+| `/{id}` | PUT | ✅ Yes | Update record |
+| `/{id}` | DELETE | ✅ Yes | Delete record |
+
+#### 👔 Garment Models (`/api/model`)
+| Endpoint | Method | Auth Required | Purpose |
+|----------|--------|---------------|---------|
+| `/` | GET | ✅ Yes | Get all models (with filters) |
+| `/{id}` | GET | ✅ Yes | Get model by ID |
+| `/AddUnits` | POST | ✅ Yes | Add units to model inventory |
+| `/` | POST | ✅ Yes | Create new model |
+| `/{id}` | PUT | ✅ Yes | Update model |
+| `/{id}` | DELETE | ✅ Yes | Delete model |
+
+### Authentication Header Format
+
+All protected endpoints require a JWT token in the Authorization header:
 
 ```http
-# Authentication
-POST /api/auth/login
-POST /api/auth/register
-POST /api/auth/refresh-token
-POST /api/auth/logout
-
-# Orders
-GET /api/orders
-GET /api/orders/{id}
-POST /api/orders
-PUT /api/orders/{id}
-DELETE /api/orders/{id}
-
-# Workers
-GET /api/workers
-GET /api/workers/{id}
-POST /api/workers
-PUT /api/workers/{id}
-
-# Inventory
-GET /api/fabrics
-POST /api/fabrics
-PUT /api/fabrics/{id}
-
-# Financial
-GET /api/expenses
-POST /api/expenses
-GET /api/revenue
-POST /api/revenue
+Authorization: Bearer {jwt_token}
 ```
+
+### Response Status Codes
+
+| Code | Meaning | Scenario |
+|------|---------|----------|
+| **200** | OK | Successful GET/PUT request |
+| **201** | Created | Successful resource creation |
+| **204** | No Content | Successful DELETE request |
+| **400** | Bad Request | Invalid parameters or validation error |
+| **401** | Unauthorized | Missing or invalid JWT token |
+| **404** | Not Found | Resource doesn't exist |
+| **500** | Server Error | Unexpected server error |
 
 ---
 

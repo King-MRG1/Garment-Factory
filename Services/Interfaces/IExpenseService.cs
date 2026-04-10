@@ -12,8 +12,8 @@ namespace Services.Interfaces
         public Task<IEnumerable<ViewExpenseDto>> GetAllExpenseAsync();
         public Task<IEnumerable<ViewExpenseDto>> GetExpensesByTraderIdAsync(int traderId);
         public Task<IEnumerable<ViewExpenseDto>> GetExpensesByFilterAsync(ExpenseFilter expenseFilter);
-        public Task<ViewExpenseDto?> AddExpense(CreateExpenseDto createExpenseDto);
-        public Task<ViewExpenseDto?> UpdateExpense(int id,UpdateExpenseDto updateExpenseDto);
-        public Task<ViewExpenseDto?> DeleteExpense(int id);
+        public Task<ViewExpenseDto?> AddExpenseAsync(CreateExpenseDto createExpenseDto);
+        public Task<ViewExpenseDto?> UpdateExpenseAsync(int id,UpdateExpenseDto updateExpenseDto);
+        public Task<ViewExpenseDto?> DeleteExpenseAsync(int id);
     }
 }

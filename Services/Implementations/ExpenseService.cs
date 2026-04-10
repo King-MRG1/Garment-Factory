@@ -21,7 +21,7 @@ namespace Services.Implementations
             _currentUserService = currentUserService;
         }
 
-        public async Task<ViewExpenseDto?> AddExpense(CreateExpenseDto createExpenseDto)
+        public async Task<ViewExpenseDto?> AddExpenseAsync(CreateExpenseDto createExpenseDto)
         {
             var expense = createExpenseDto.ToExpense();
 
@@ -55,7 +55,7 @@ namespace Services.Implementations
                 trader.Amount -= amount;
         }
 
-        public async Task<ViewExpenseDto?> DeleteExpense(int id)
+        public async Task<ViewExpenseDto?> DeleteExpenseAsync(int id)
         {
             var expense = await _unitOfWork.Expenses.GetExpenseById(id);
 
@@ -92,7 +92,7 @@ namespace Services.Implementations
             return expenses.Select(e => e.ToExpenseDto());
         }
 
-        public async Task<ViewExpenseDto?> UpdateExpense(int id,UpdateExpenseDto updateExpenseDto)
+        public async Task<ViewExpenseDto?> UpdateExpenseAsync(int id,UpdateExpenseDto updateExpenseDto)
         {
             var expense = await _unitOfWork.Expenses.GetExpenseById(id);
 

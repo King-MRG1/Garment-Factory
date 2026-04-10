@@ -125,7 +125,7 @@ namespace Services.Implementations
             var totalDeductions = items.Where(ad => ad.Type == AdvanceOrDeduction.Deduction)
                                        .Sum(ad => ad.Amount);
 
-            await _unitOfWork.AdvanceAndDeductions.DeleteRangeAsync(itemIds);
+            await _unitOfWork.AdvanceAndDeductions.MakeAdvanceAndDeductionUsed(itemIds);
 
             return (totalAdvances, totalDeductions);
         }
@@ -195,6 +195,7 @@ namespace Services.Implementations
                 TotalDeductions = totalDeductions,
                 NetPayment = totalEarned - totalAdvances - totalDeductions
             };
+
             return paymentReport;
         }
 

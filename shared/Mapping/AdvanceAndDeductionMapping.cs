@@ -18,6 +18,7 @@ namespace Shared.Mapping
                 Type = advanceAndDeduction.Type.ToString(),
                 Date = advanceAndDeduction.Date,
                 Worker_Name = advanceAndDeduction.Worker.Worker_Name,
+                IsUsed = advanceAndDeduction.IsUsed
             };
         }
         public static AdvanceAndDeduction ToAdvanceAndDeduction(this CreateAdvanceAndDeductionDto createAdvanceAndDeductionDto)
@@ -29,10 +30,11 @@ namespace Shared.Mapping
                 Type = (AdvanceOrDeduction)createAdvanceAndDeductionDto.Type,
                 Date = DateOnly.FromDateTime(DateTime.Now),
                 Worker_Id = createAdvanceAndDeductionDto.Worker_Id,
+                IsUsed = false
             };
         }
-        public static AdvanceAndDeduction UpdateAdvanceAndDeduction(this UpdateAdvanceAndDeductionDto updateAdvanceAndDeductionDto
-            , AdvanceAndDeduction advanceAndDeduction)
+        public static AdvanceAndDeduction UpdateAdvanceAndDeduction(this AdvanceAndDeduction advanceAndDeduction,
+            UpdateAdvanceAndDeductionDto updateAdvanceAndDeductionDto)
         {
             advanceAndDeduction.Amount = updateAdvanceAndDeductionDto.Amount;
             advanceAndDeduction.Description = updateAdvanceAndDeductionDto.Description;

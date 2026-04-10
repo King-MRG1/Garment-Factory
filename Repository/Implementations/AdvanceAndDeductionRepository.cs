@@ -20,14 +20,23 @@ namespace Repository.Implementations
             return AdvanceOrDeduction;
         }
 
-        public async Task<IEnumerable<AdvanceAndDeduction>> GetAdvancesAndDeductionsByFilterAsync(int type)
+        public async Task<IEnumerable<AdvanceAndDeduction>> GetAdvancesAndDeductionsByFilterAsync(int type, DateOnly startDate, DateOnly endDate, string workerName)
         {
             var query = _context.AdvanceAndDeductions
                 .Include(a => a.Worker)
-                .AsQueryable(); 
+                .AsQueryable();
 
-            if(type != 0)
+            if (type != 0)
                 query = query.Where(a => a.Type == (AdvanceOrDeduction)type);
+
+            if (startDate != default)
+                query = query.Where(a => a.Date >= startDate);
+
+            if (endDate != default)
+                query = query.Where(a => a.Date <= endDate);
+
+            if (string.IsNullOrEmpty(workerName) == false)
+                query = query.Where(a => a.Worker.Worker_Name.Contains(workerName));
 
             return await query.ToListAsync();
         }
@@ -48,6 +57,20 @@ namespace Repository.Implementations
                 .ToListAsync();
 
             return AdvancesOrDeductions;
+        }
+
+        public async Task MakeAdvanceAndDeductionUsed(List<int> advanceAndDeductionIds)
+        {
+            var advancesAndDeductions = await _context.AdvanceAndDeductions
+                .Where(a => advanceAndDeductionIds.Contains(a.Id))
+                .ToListAsync();
+
+            foreach (var item in advancesAndDeductions)
+            {
+                item.IsUsed = true;
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

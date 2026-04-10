@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using Shared.Dtos.QueryFilters;
+using Shared.Dtos.ReportsDtos;
 using Shared.Dtos.WorkerDtos;
 
 namespace API.Controllers
@@ -43,6 +44,18 @@ namespace API.Controllers
                 return NotFound();
 
             return Ok(worker);
+        }
+
+        [HttpPost("weekly-payment")]
+        public async Task<IActionResult> CreateWeeklyPayment(
+            [FromBody] CreateWeeklyPaymentDto createWeeklyPaymentDto,[FromQuery] bool addToExpense)
+        {
+            var paymentReport = await _unitOfServices.Workers.GetWeeklyPaymentAsync(createWeeklyPaymentDto,addToExpense);
+
+            if (paymentReport == null)
+                return NotFound();
+
+            return Ok(paymentReport);
         }
 
         [HttpPost]

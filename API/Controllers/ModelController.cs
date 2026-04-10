@@ -37,6 +37,17 @@ namespace API.Controllers
             return Ok(model);
         }
 
+        [HttpPost("AddUnits")]
+        public async Task<IActionResult> AddUnitsToModel(int modelId, int units)
+        {
+            var updatedModel = await _unitOfServices.Models.AddQuantityToModelAsync(modelId, units);
+
+            if(updatedModel == null)
+                return NotFound();
+
+            return Ok(updatedModel);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateModel([FromBody] CreateModelDto createModelDto)
         {

@@ -18,6 +18,7 @@ namespace Services.Implementations
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
         }
+
         public async Task<ViewOrderDto?> CreateOrderAsync(CreateOrderDto createOrderDto)
         {
             var trader = await _unitOfWork.Traders.GetByIdAsync(createOrderDto.Trader_Id);

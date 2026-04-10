@@ -12,5 +12,6 @@ namespace Shared.Dtos.AdvanceAndDeductionDtos
         public string Type { get; set; }
         public DateOnly Date { get; set; }
         public string Worker_Name { get; set; }
+        public bool IsUsed { get; set; }
     }
 }
