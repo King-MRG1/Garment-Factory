@@ -21,68 +21,107 @@ namespace API.Controllers
         [HttpGet("FabricReport")]
         public async Task<IActionResult> GetFabricReport([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
         {
-            var fabrics = await _unitOfServices.Fabrics.GetFabricReportAsync(startDate, endDate);
-
-            return Ok(fabrics);
+            try
+            {
+                var fabrics = await _unitOfServices.Fabrics.GetFabricReportAsync(startDate, endDate);
+                return Ok(fabrics);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve fabric report", error = ex.Message });
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetFabrics([FromQuery] FabricFilter fabricFilter)
         {
-            var fabrics = await _unitOfServices.Fabrics.GetFabricsByFilterAsync(fabricFilter);
-
-            return Ok(fabrics);
+            try
+            {
+                var fabrics = await _unitOfServices.Fabrics.GetFabricsByFilterAsync(fabricFilter);
+                return Ok(fabrics);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve fabrics", error = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFabricById(int id)
         {
-            var fabric = await _unitOfServices.Fabrics.GetFabricByIdAsync(id);
+            try
+            {
+                var fabric = await _unitOfServices.Fabrics.GetFabricByIdAsync(id);
 
-            if (fabric == null)
-                return NotFound();
+                if (fabric == null)
+                    return NotFound();
 
-            return Ok(fabric);
+                return Ok(fabric);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve fabric", error = ex.Message });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateFabric(CreateFabricDto createFabricDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var fabric = await _unitOfServices.Fabrics.CreateFabricAsync(createFabricDto);
+                var fabric = await _unitOfServices.Fabrics.CreateFabricAsync(createFabricDto);
 
-            if (fabric == null)
-                return BadRequest();
+                if (fabric == null)
+                    return BadRequest();
 
-            return CreatedAtAction(nameof(GetFabricById), new { id = fabric.Id }, fabric);
+                return CreatedAtAction(nameof(GetFabricById), new { id = fabric.Id }, fabric);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to create fabric", error = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateFabric(int id, UpdateFabricDto updateFabricDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var fabric = await _unitOfServices.Fabrics.UpdateFabricAsync(id, updateFabricDto);
+                var fabric = await _unitOfServices.Fabrics.UpdateFabricAsync(id, updateFabricDto);
 
-            if (fabric == null)
-                return NotFound();
+                if (fabric == null)
+                    return NotFound();
 
-            return Ok(fabric);
+                return Ok(fabric);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to update fabric", error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFabric(int id)
         {
-            var deletedFabric = await _unitOfServices.Fabrics.DeleteFabricAsync(id);
+            try
+            {
+                var deletedFabric = await _unitOfServices.Fabrics.DeleteFabricAsync(id);
 
-            if (deletedFabric == null)
-                return NotFound();
+                if (deletedFabric == null)
+                    return NotFound();
 
-            return Ok("Fabric deleted successfully");
-
+                return Ok("Fabric deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to delete fabric", error = ex.Message });
+            }
         }
     }
 }

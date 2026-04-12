@@ -41,7 +41,7 @@ namespace Services.Implementations
             return expense.ToExpenseDto();
         }
 
-        private async Task EditAmountToTrader(int traderId, decimal amount)
+        private async Task EditAmountToTrader(int? traderId, decimal amount)
         {
             var trader = await _unitOfWork.Traders.GetTraderByIdAsync(traderId);
 
@@ -61,6 +61,9 @@ namespace Services.Implementations
 
             if (expense == null)
                 return null;
+            
+            if(expense.Trader_Id.HasValue)
+                await EditAmountToTrader(expense.Trader_Id, -expense.Amount);
 
             _unitOfWork.Expenses.Delete(expense);
             await _unitOfWork.SaveChangesAsync();
@@ -98,6 +101,17 @@ namespace Services.Implementations
 
             if (expense == null)
                 return null;
+
+            if(updateExpenseDto.Trader_Id.HasValue && updateExpenseDto.Trader_Id != expense.Trader_Id)
+            {
+                await EditAmountToTrader(expense.Trader_Id, -expense.Amount);
+
+                await EditAmountToTrader(updateExpenseDto.Trader_Id, updateExpenseDto.Amount);
+            }
+            else if(updateExpenseDto.Trader_Id.HasValue)
+            {
+                await EditAmountToTrader(expense.Trader_Id , updateExpenseDto.Amount - expense.Amount);
+            }
 
             expense.UpdateExpense(updateExpenseDto);
 

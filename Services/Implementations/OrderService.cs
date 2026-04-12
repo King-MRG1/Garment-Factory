@@ -21,36 +21,46 @@ namespace Services.Implementations
 
         public async Task<ViewOrderDto?> CreateOrderAsync(CreateOrderDto createOrderDto)
         {
-            var trader = await _unitOfWork.Traders.GetByIdAsync(createOrderDto.Trader_Id);
-            if (trader == null)
-                throw new Exception($"Trader with ID {createOrderDto.Trader_Id} not found.");
+            try
+            {
+                var trader = await _unitOfWork.Traders.GetByIdAsync(createOrderDto.Trader_Id);
+                if (trader == null)
+                    throw new Exception($"Trader with ID {createOrderDto.Trader_Id} not found.");
 
-            var userId = _currentUserService.GetCurrentUserId();
-            if (string.IsNullOrWhiteSpace(userId))
-                throw new InvalidOperationException("UserID not found in authentication context.");
+                var userId = _currentUserService.GetCurrentUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                    throw new InvalidOperationException("UserID not found in authentication context.");
 
-            var order = createOrderDto.ToOrder();
+                var order = createOrderDto.ToOrder();
 
-            var ordermodels = await ProcessOrderModelsAsync(order.OrderModels, createOrderDto.Is_Rental);
+                var ordermodels = await ProcessOrderModelsAsync(order.OrderModels, createOrderDto.Is_Rental);
 
-            var totalCost = ordermodels.Sum(om => om.Price);
-            var totalQuantity = ordermodels.Sum(om => om.Quantity);
+                var totalCost = ordermodels.Sum(om => om.Price);
+                var totalQuantity = ordermodels.Sum(om => om.Quantity);
 
-            trader.Amount += totalCost;
+                trader.Amount += totalCost;
 
-            order.UserId = userId;
+                order.UserId = userId;
 
-            await _unitOfWork.Orders.AddAsync(order);
+                await _unitOfWork.Orders.AddAsync(order);
 
-            await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
-            var orderDto = order.ToOrderDto();
-            orderDto.OrderModels = ordermodels;
-            orderDto.Total_Cost = totalCost;
-            orderDto.Total_Quantity = totalQuantity;
+                var orderDto = order.ToOrderDto();
+                orderDto.OrderModels = ordermodels;
+                orderDto.Total_Cost = totalCost;
+                orderDto.Total_Quantity = totalQuantity;
 
-            return orderDto;
-
+                return orderDto;
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"Order creation failed: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while creating the order: {ex.Message}");
+            }
         }
 
         private async Task<List<ViewOrderModelDto>>
@@ -83,7 +93,7 @@ namespace Services.Implementations
                     Order_Id = orderModel.Order_Id,
                     Model_Name = model.Model_Name,
                     Quantity = orderModel.Quantity,
-                    Price = isRental ? model.Price_Trader_Rent * orderModel.Quantity 
+                    Price = isRental ? model.Price_Trader_Rent * orderModel.Quantity
                     : model.Price_Trader_Cash * orderModel.Quantity
                 });
             }
@@ -95,7 +105,7 @@ namespace Services.Implementations
         {
             var order = await _unitOfWork.Orders.GetByIdAsync(id);
 
-            if (order == null) 
+            if (order == null)
                 return null;
 
             _unitOfWork.Orders.Delete(order);

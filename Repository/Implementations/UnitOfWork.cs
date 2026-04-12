@@ -1,5 +1,7 @@
 using Database.Data;
 using Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Repository.Implementations
 {
@@ -34,7 +36,26 @@ namespace Repository.Implementations
 
         public async Task<int> SaveChangesAsync()
         {
-            return await _context.SaveChangesAsync();
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new InvalidOperationException($"Concurrency error - the data was modified by another user: {ex.Message}", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new InvalidOperationException($"Database update error: {ex.Message}", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"Database save operation failed: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred while saving changes: {ex.Message}", ex);
+            }
         }
 
         public void Dispose()

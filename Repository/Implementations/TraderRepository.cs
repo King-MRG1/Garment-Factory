@@ -11,7 +11,7 @@ namespace Repository.Implementations
         {
         }
 
-        public async Task<Trader> GetTraderByIdAsync(int id)
+        public async Task<Trader> GetTraderByIdAsync(int? id)
         {
             var trader = await _context.Traders
                 .Include(Trader => Trader.Phones)

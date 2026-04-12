@@ -1,5 +1,7 @@
-﻿using Repository.Interfaces;
+﻿using Database.Models;
+using Repository.Interfaces;
 using Services.Interfaces;
+using Shared.Dtos.ExpenseDtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.RevenueDtos;
 using Shared.Mapping;
@@ -24,7 +26,7 @@ namespace Services.Implementations
             var revenue = createRevenue.ToRevenue();
 
             if(revenue.Trader_Id.HasValue)
-                await SubAmountFromTrader(revenue.Trader_Id.Value, revenue.Amount);
+                await EditAmountToTrader(revenue.Trader_Id.Value, revenue.Amount);
             
             var userId = _currentUserService.GetCurrentUserId();
             if (string.IsNullOrWhiteSpace(userId))
@@ -38,14 +40,18 @@ namespace Services.Implementations
             return revenue.ToRevenueDto();
         }
 
-        private async Task SubAmountFromTrader(int traderId, decimal amount)
+        private async Task EditAmountToTrader(int? traderId, decimal amount)
         {
             var trader = await _unitOfWork.Traders.GetTraderByIdAsync(traderId);
 
             if (trader == null)
                 return;
 
-            trader.Amount -= amount;
+            if (trader.Trader_Type == TraderType.Customer)
+                trader.Amount -= amount;
+
+            else if (trader.Trader_Type == TraderType.Supplier)
+                trader.Amount += amount;
         }
 
         public async Task<ViewRevenueDto?> DeleteRevenue(int id)
@@ -54,6 +60,9 @@ namespace Services.Implementations
 
             if (revenue == null)
                 return null;
+
+            if(revenue.Trader_Id.HasValue)
+                await EditAmountToTrader(revenue.Trader_Id, -revenue.Amount);
 
             _unitOfWork.Revenues.Delete(revenue);
             await _unitOfWork.SaveChangesAsync();
@@ -91,6 +100,17 @@ namespace Services.Implementations
 
             if (revenue == null)
                 return null;
+
+            if (updateRevenue.Trader_Id.HasValue && updateRevenue.Trader_Id != revenue.Trader_Id)
+            {
+                await EditAmountToTrader(revenue.Trader_Id, -revenue.Amount);
+
+                await EditAmountToTrader(updateRevenue.Trader_Id, updateRevenue.Amount);
+            }
+            else if (updateRevenue.Trader_Id.HasValue)
+            {
+                await EditAmountToTrader(revenue.Trader_Id, updateRevenue.Amount - revenue.Amount);
+            }
 
             revenue.UpdateRevenue(updateRevenue);
 

@@ -21,53 +21,87 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetExpenses([FromQuery] ExpenseFilter expenseFilter)
         {
-            var expenses = await _unitOfServices.Expenses.GetExpensesByFilterAsync(expenseFilter);
-            return Ok(expenses);
+            try
+            {
+                var expenses = await _unitOfServices.Expenses.GetExpensesByFilterAsync(expenseFilter);
+                return Ok(expenses);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve expenses", error = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetExpenseById(int id)
         {
-            var expense = await _unitOfServices.Expenses.GetExpenseByIdAsync(id);
+            try
+            {
+                var expense = await _unitOfServices.Expenses.GetExpenseByIdAsync(id);
 
-            if (expense == null)
-                return NotFound();
+                if (expense == null)
+                    return NotFound();
 
-            return Ok(expense);
+                return Ok(expense);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve expense", error = ex.Message });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> AddExpense([FromBody] CreateExpenseDto createExpenseDto)
         {
-            var expense = await _unitOfServices.Expenses.AddExpenseAsync(createExpenseDto);
+            try
+            {
+                var expense = await _unitOfServices.Expenses.AddExpenseAsync(createExpenseDto);
 
-            if (expense == null)
-                return BadRequest("Failed to create expense.");
+                if (expense == null)
+                    return BadRequest("Failed to create expense.");
 
-            return Ok(expense);
+                return Ok(expense);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to add expense", error = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateExpense(int id, [FromBody] UpdateExpenseDto updateExpenseDto)
         {
-            var expense = await _unitOfServices.Expenses.UpdateExpenseAsync(id, updateExpenseDto);
+            try
+            {
+                var expense = await _unitOfServices.Expenses.UpdateExpenseAsync(id, updateExpenseDto);
 
-            if (expense == null)
-                return NotFound();
+                if (expense == null)
+                    return NotFound();
 
-            return Ok(expense);
+                return Ok(expense);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to update expense", error = ex.Message });
+            }
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteExpense(int id)
         {
-            var expense = await _unitOfServices.Expenses.DeleteExpenseAsync(id);
+            try
+            {
+                var expense = await _unitOfServices.Expenses.DeleteExpenseAsync(id);
 
-            if (expense == null)
-                return NotFound();
+                if (expense == null)
+                    return NotFound();
 
-            return NoContent();
-
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to delete expense", error = ex.Message });
+            }
         }
     }
 }

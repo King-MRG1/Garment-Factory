@@ -19,6 +19,7 @@ namespace Services.Implementations
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
         }
+
         public async Task<ViewWorkerDto?> CreateWorkerAsync(CreateWorkerDto createWorkerDto)
         {
             var worker = createWorkerDto.ToWorker();

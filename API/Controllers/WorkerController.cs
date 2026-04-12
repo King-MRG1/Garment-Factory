@@ -22,73 +22,120 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetWorkers([FromQuery] WorkerFilter workerFilter)
         {
-            var workers = await _unitOfServices.Workers.GetWorkersByFilterAsync(workerFilter);
-
-            return Ok(workers);
+            try
+            {
+                var workers = await _unitOfServices.Workers.GetWorkersByFilterAsync(workerFilter);
+                return Ok(workers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve workers", error = ex.Message });
+            }
         }
 
         [HttpGet("types")]
         public async Task<IActionResult> GetWorkerTypes()
         {
-            var workerTypes = await _unitOfServices.Workers.GetWorkerTypesAsync();
-
-            return Ok(workerTypes);
+            try
+            {
+                var workerTypes = await _unitOfServices.Workers.GetWorkerTypesAsync();
+                return Ok(workerTypes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve worker types", error = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetWorkerById(int id)
         {
-            var worker = await _unitOfServices.Workers.GetWorkerByIdAsync(id);
+            try
+            {
+                var worker = await _unitOfServices.Workers.GetWorkerByIdAsync(id);
 
-            if (worker == null)
-                return NotFound();
+                if (worker == null)
+                    return NotFound();
 
-            return Ok(worker);
+                return Ok(worker);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve worker", error = ex.Message });
+            }
         }
 
         [HttpPost("weekly-payment")]
         public async Task<IActionResult> CreateWeeklyPayment(
-            [FromBody] CreateWeeklyPaymentDto createWeeklyPaymentDto,[FromQuery] bool addToExpense)
+            [FromBody] CreateWeeklyPaymentDto createWeeklyPaymentDto, [FromQuery] bool addToExpense)
         {
-            var paymentReport = await _unitOfServices.Workers.GetWeeklyPaymentAsync(createWeeklyPaymentDto,addToExpense);
+            try
+            {
+                var paymentReport = await _unitOfServices.Workers.GetWeeklyPaymentAsync(createWeeklyPaymentDto, addToExpense);
 
-            if (paymentReport == null)
-                return NotFound();
+                if (paymentReport == null)
+                    return NotFound();
 
-            return Ok(paymentReport);
+                return Ok(paymentReport);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to create weekly payment", error = ex.Message });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateWorker([FromBody] CreateWorkerDto createWorkerDto)
         {
-            var worker = await _unitOfServices.Workers.CreateWorkerAsync(createWorkerDto);
+            try
+            {
+                var worker = await _unitOfServices.Workers.CreateWorkerAsync(createWorkerDto);
 
-            if (worker == null)
-                return BadRequest();
+                if (worker == null)
+                    return BadRequest();
 
-            return Ok(worker);
+                return Ok(worker);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to create worker", error = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateWorker(int id, [FromBody] UpdateWorkerDto updateWorkerDto)
         {
-            var worker = await _unitOfServices.Workers.UpdateWorkerAsync(id, updateWorkerDto);
+            try
+            {
+                var worker = await _unitOfServices.Workers.UpdateWorkerAsync(id, updateWorkerDto);
 
-            if (worker == null)
-                return NotFound();
+                if (worker == null)
+                    return NotFound();
 
-            return Ok(worker);
+                return Ok(worker);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to update worker", error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWorker(int id)
         {
-            var deletedWorker = await _unitOfServices.Workers.DeleteWorkerAsync(id);
+            try
+            {
+                var deletedWorker = await _unitOfServices.Workers.DeleteWorkerAsync(id);
 
-            if (deletedWorker == null)
-                return NotFound();
+                if (deletedWorker == null)
+                    return NotFound();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to delete worker", error = ex.Message });
+            }
         }
     }
 }

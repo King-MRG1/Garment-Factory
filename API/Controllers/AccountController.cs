@@ -20,67 +20,95 @@ namespace API.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var result = await _unitOfServices.Auth.RegisterAsync(model);
+
+                if (!result.IsSuccess)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
             }
-
-            var result = await _unitOfServices.Auth.RegisterAsync(model);
-
-            if (!result.IsSuccess)
+            catch (Exception ex)
             {
-                return BadRequest(result);
+                return StatusCode(500, new { message = "Registration failed", error = ex.Message });
             }
-
-            return Ok(result);
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
-            var result = await _unitOfServices.Auth.LoginAsync(model);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var result = await _unitOfServices.Auth.LoginAsync(model);
 
-            if (!result.IsSuccess)
+                if (!result.IsSuccess)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
             {
-                return BadRequest(result);
+                return StatusCode(500, new { message = "Login failed", error = ex.Message });
             }
-
-            return Ok(result);
         }
 
         [HttpGet("RefreshToken")]
         public async Task<IActionResult> RefreshToken([FromHeader(Name = "X-Refresh-Token")] string refreshToken)
         {
-            if (string.IsNullOrWhiteSpace(refreshToken))
+            try
             {
-                return BadRequest("Refresh token is required.");
+                if (string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    return BadRequest("Refresh token is required.");
+                }
+                var result = await _unitOfServices.Auth.RefreshTokenAsync(refreshToken);
+                if (!result.IsSuccess)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
             }
-            var result = await _unitOfServices.Auth.RefreshTokenAsync(refreshToken);
-            if (!result.IsSuccess)
+            catch (Exception ex)
             {
-                return BadRequest(result);
+                return StatusCode(500, new { message = "Token refresh failed", error = ex.Message });
             }
-            return Ok(result);
         }
 
         [Authorize]
         [HttpGet("Logout")]
         public async Task<IActionResult> Logout([FromHeader(Name = "X-Refresh-Token")] string refreshToken)
         {
-            if (string.IsNullOrWhiteSpace(refreshToken))
+            try
             {
-                return BadRequest("Refresh token is required.");
+                if (string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    return BadRequest("Refresh token is required.");
+                }
+                var result = await _unitOfServices.Auth.Logout(refreshToken);
+                if (!result.IsSuccess)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
             }
-            var result = await _unitOfServices.Auth.Logout(refreshToken);
-            if (!result.IsSuccess)
+            catch (Exception ex)
             {
-                return BadRequest(result);
+                return StatusCode(500, new { message = "Logout failed", error = ex.Message });
             }
-            return Ok(result);
         }
     }
 }

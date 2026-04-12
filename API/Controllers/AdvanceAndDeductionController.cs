@@ -21,61 +21,103 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAdvancesAndDeductions([FromQuery] AdvanceAndDeductionFilter filter)
         {
-            var result = await _unitOfService.AdvancesAndDeductions
-                .GetAdvancesAndDeductionsByFilterAsync(filter);
+            try
+            {
+                var result = await _unitOfService.AdvancesAndDeductions
+                    .GetAdvancesAndDeductionsByFilterAsync(filter);
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve advances and deductions", error = ex.Message });
+            }
         }
 
         [HttpGet("types")]
         public async Task<IActionResult> GetAdvanceAndDeductionTypes()
         {
-            var result = await _unitOfService.AdvancesAndDeductions.GetTypesAsync();
-            return Ok(result);
+            try
+            {
+                var result = await _unitOfService.AdvancesAndDeductions.GetTypesAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve types", error = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAdvanceOrDeductionById(int id)
         {
-            var result = await _unitOfService.AdvancesAndDeductions.GetAdvanceOrDeductionByIdAsync(id);
+            try
+            {
+                var result = await _unitOfService.AdvancesAndDeductions.GetAdvanceOrDeductionByIdAsync(id);
 
-            if (result == null)
-                return NotFound();
+                if (result == null)
+                    return NotFound();
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve record", error = ex.Message });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateAdvanceOrDeduction([FromBody] CreateAdvanceAndDeductionDto dto)
         {
-            var result = await _unitOfService.AdvancesAndDeductions.CreateAdvanceOrDeductionAsync(dto);
+            try
+            {
+                var result = await _unitOfService.AdvancesAndDeductions.CreateAdvanceOrDeductionAsync(dto);
 
-            if (result == null)
-                return BadRequest("Failed to create advance or deduction.");
+                if (result == null)
+                    return BadRequest("Failed to create advance or deduction.");
 
-            return CreatedAtAction(nameof(GetAdvanceOrDeductionById), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetAdvanceOrDeductionById), new { id = result.Id }, result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to create record", error = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAdvanceOrDeduction(int id, [FromBody] UpdateAdvanceAndDeductionDto dto)
         {
-            var result = await _unitOfService.AdvancesAndDeductions.UpdateAdvanceOrDeductionAsync(id, dto);
+            try
+            {
+                var result = await _unitOfService.AdvancesAndDeductions.UpdateAdvanceOrDeductionAsync(id, dto);
 
-            if (result == null)
-                return NotFound();
+                if (result == null)
+                    return NotFound();
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to update record", error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAdvanceOrDeduction(int id)
         {
-            var result = await _unitOfService.AdvancesAndDeductions.DeleteAdvanceOrDeductionAsync(id);
+            try
+            {
+                var result = await _unitOfService.AdvancesAndDeductions.DeleteAdvanceOrDeductionAsync(id);
 
-            if (result == null)
-                return NotFound();
+                if (result == null)
+                    return NotFound();
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to delete record", error = ex.Message });
+            }
         }
     }
 }

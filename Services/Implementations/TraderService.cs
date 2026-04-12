@@ -34,6 +34,11 @@ namespace Services.Implementations
 
             trader.UserId = userid;
 
+            foreach (var phone in trader.Phones)
+            {
+                phone.UserId = userid;
+            }
+
             await _unitOfWork.Traders.AddAsync(trader);
             await _unitOfWork.SaveChangesAsync();
 

@@ -21,59 +21,97 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetOrders([FromQuery] OrderFilter orderFilter)
         {
-            var orders = await _unitOfServices.Orders.GetOrdersByFilterAsync(orderFilter);
-
-            return Ok(orders);
+            try
+            {
+                var orders = await _unitOfServices.Orders.GetOrdersByFilterAsync(orderFilter);
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve orders", error = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
-            var order = await _unitOfServices.Orders.GetOrderByIdAsync(id);
+            try
+            {
+                var order = await _unitOfServices.Orders.GetOrderByIdAsync(id);
 
-            if (order == null)
-                return NotFound();
+                if (order == null)
+                    return NotFound();
 
-            return Ok(order);
+                return Ok(order);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve order", error = ex.Message });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto createOrderDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var createdOrder = await _unitOfServices.Orders.CreateOrderAsync(createOrderDto);
+                var createdOrder = await _unitOfServices.Orders.CreateOrderAsync(createOrderDto);
 
-            if (createdOrder == null)
-                return BadRequest("Failed to create order.");
+                if (createdOrder == null)
+                    return BadRequest("Failed to create order.");
 
-            return CreatedAtAction(nameof(GetOrderById), new { id = createdOrder.Id }, createdOrder);
+                return CreatedAtAction(nameof(GetOrderById), new { id = createdOrder.Id }, createdOrder);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = "Invalid operation", error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to create order", error = ex.Message });
+            }
         }
 
         [HttpPut("/{id}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDto updateOrderDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var updatedOrder = await _unitOfServices.Orders.UpdateOrderAsync(id, updateOrderDto);
+                var updatedOrder = await _unitOfServices.Orders.UpdateOrderAsync(id, updateOrderDto);
 
-            if (updatedOrder == null)
-                return BadRequest("Failed to update order.");
+                if (updatedOrder == null)
+                    return BadRequest("Failed to update order.");
 
-            return Ok(updatedOrder);
+                return Ok(updatedOrder);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to update order", error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
-            var deletedOrder = await _unitOfServices.Orders.DeleteOrderAsync(id);
+            try
+            {
+                var deletedOrder = await _unitOfServices.Orders.DeleteOrderAsync(id);
 
-            if (deletedOrder == null)
-                return BadRequest("Failed to delete order.");
+                if (deletedOrder == null)
+                    return BadRequest("Failed to delete order.");
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to delete order", error = ex.Message });
+            }
         }
     }
 }

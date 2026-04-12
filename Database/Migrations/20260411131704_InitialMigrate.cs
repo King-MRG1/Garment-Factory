@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Database.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial_Migrate : Migration
+    public partial class InitialMigrate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -58,10 +58,11 @@ namespace Database.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Model_Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Price_Trader = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Price_Stitcher = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Price_Ironer = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Price_Cutter = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price_Trader_Cash = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price_Trader_Rent = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Total_Units = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     Last_Update = table.Column<DateOnly>(type: "date", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -215,6 +216,29 @@ namespace Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsRevoked = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Expenses",
                 columns: table => new
                 {
@@ -320,6 +344,7 @@ namespace Database.Migrations
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
                     Worker_Id = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -464,6 +489,22 @@ namespace Database.Migrations
                 column: "Worker_Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_ExpiryDate",
+                table: "RefreshTokens",
+                column: "ExpiryDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_Token",
+                table: "RefreshTokens",
+                column: "Token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Revenues_Trader_Id",
                 table: "Revenues",
                 column: "Trader_Id");
@@ -503,13 +544,13 @@ namespace Database.Migrations
                 name: "Phones");
 
             migrationBuilder.DropTable(
+                name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
                 name: "Revenues");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Models");
@@ -519,6 +560,9 @@ namespace Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "Worker");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Traders");

@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace Database.Data
 {
@@ -8,12 +8,49 @@ namespace Database.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
+            var basePath = FindApiProjectPath();
+
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(basePath)
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{GetEnvironment()}.json", optional: true)
+                .Build();
+
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException(
+                    $"Connection string 'DefaultConnection' not found in appsettings.json at: {basePath}");
+            }
+
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlServer("Server=MRG\\MSSQLSERVER01;Database=GarmentFactory;Integrated Security=True;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer(connectionString);
 
-            var httpContextAccessor = new HttpContextAccessor();
+            return new AppDbContext(optionsBuilder.Options, null);
+        }
+        private static string FindApiProjectPath()
+        {
+            var currentDir = Directory.GetCurrentDirectory();
 
-            return new AppDbContext(optionsBuilder.Options, httpContextAccessor);
+            if (File.Exists(Path.Combine(currentDir, "appsettings.json")))
+                return currentDir;
+
+            var apiPath = Path.Combine(currentDir, "..", "API");
+            if (File.Exists(Path.Combine(apiPath, "appsettings.json")))
+                return Path.GetFullPath(apiPath);
+
+            var apiSubPath = Path.Combine(currentDir, "API");
+            if (File.Exists(Path.Combine(apiSubPath, "appsettings.json")))
+                return apiSubPath;
+
+            throw new InvalidOperationException(
+                $"Could not find appsettings.json. Searched in: {currentDir}, {apiPath}, {apiSubPath}");
+        }
+
+        private static string GetEnvironment()
+        {
+            return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
         }
     }
 }
