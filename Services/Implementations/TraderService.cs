@@ -1,12 +1,12 @@
 ﻿using Database.Models;
-using Microsoft.Identity.Client;
+using Microsoft.Extensions.Logging;
 using Repository.Interfaces;
 using Services.Interfaces;
 using Shared.Dtos;
-using Shared.Dtos.OrderDtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.TraderDtos;
 using Shared.Helper;
+using Shared.Interfaces;
 using Shared.Mapping;
 
 namespace Services.Implementations
@@ -15,14 +15,23 @@ namespace Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
-        public TraderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+        private readonly ILogger<TraderService> _logger; 
+        public TraderService(
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService,
+            ILogger<TraderService> logger)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task<ViewTraderDto?> AddTraderAsync(CreateTraderDto createTraderDto)
         {
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
+
+            _logger.LogInformation("{userContext} - Creating new Trader", userContext);
+
             var trader = createTraderDto.ToTrader();
 
             if (trader == null)
@@ -42,6 +51,8 @@ namespace Services.Implementations
             await _unitOfWork.Traders.AddAsync(trader);
             await _unitOfWork.SaveChangesAsync();
 
+            _logger.LogInformation("{userContext} - Trader created successfully", userContext);
+
             return trader.ToTraderDto();
         }
 
@@ -58,13 +69,6 @@ namespace Services.Implementations
             return trader.ToTraderDto();
         }
 
-        public async Task<IEnumerable<ViewTraderDto>> GetAllTradersAsync()
-        {
-            var traders = await _unitOfWork.Traders.GetAllAsync();
-
-            return traders.Select(trader => trader.ToTraderDto());
-        }
-
         public async Task<ViewTraderDto?> GetTraderByIdAsync(int id)
         {
             var trader = await _unitOfWork.Traders.GetByIdAsync(id);
@@ -77,23 +81,13 @@ namespace Services.Implementations
 
         public async Task<IEnumerable<ViewTraderDto>> GetTradersByFilterAsync(TraderFilter traderFilter)
         {
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
+
+            _logger.LogInformation("{userContext} - Retrieving Traders with filter: {filter}", userContext, traderFilter);
+
             var traders = await _unitOfWork.Traders.GetTradersByFilterAsync(
                 traderName: traderFilter.TraderName,
                 type: traderFilter.Type);
-
-            return traders.Select(trader => trader.ToTraderDto());
-        }
-
-        public async Task<IEnumerable<ViewTraderDto>> GetTradersByNameAsync(string name)
-        {
-            var traders = await _unitOfWork.Traders.GetTraderByNameAsync(name);
-
-            return traders.Select(trader => trader.ToTraderDto());
-        }
-
-        public async Task<IEnumerable<ViewTraderDto>> GetTradersByTypeAsync(TraderType traderType)
-        {
-            var traders = await _unitOfWork.Traders.GetTraderByTypeAsync(traderType);
 
             return traders.Select(trader => trader.ToTraderDto());
         }

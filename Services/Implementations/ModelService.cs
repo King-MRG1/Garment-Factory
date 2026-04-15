@@ -2,10 +2,8 @@
 using Shared.Dtos.ModelDtos;
 using Shared.Mapping;
 using Repository.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Shared.Dtos.QueryFilters;
+using Shared.Interfaces;
 
 namespace Services.Implementations
 {
@@ -87,13 +85,6 @@ namespace Services.Implementations
             await _unitOfWork.SaveChangesAsync();
 
             return model.ToModelDto();
-        }
-
-        public async Task<IEnumerable<ViewModelDto>> GetAllModelsAsync()
-        {
-            var models = await _unitOfWork.Models.GetAllModelsAsync();
-
-            return models.Select(m => m.ToModelDto());
         }
 
         public async Task<IEnumerable<ViewModelDto>> GetModelsByFilterAsync(ModelFilter modelFilter)

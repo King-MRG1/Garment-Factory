@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Services.Interfaces;
-using System;
-using System.Collections.Generic;
+using Shared.Interfaces;
 using System.Security.Claims;
-using System.Text;
 
 namespace Services.Implementations
 {

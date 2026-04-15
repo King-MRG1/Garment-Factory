@@ -11,7 +11,7 @@ namespace Shared.Dtos.AdvanceAndDeductionDtos
         public decimal Amount { get; set; }
 
         [MaxLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Range(0, 1, ErrorMessage = "Type must be 0 (Advance) or 1 (Deduction)")]
         public int Type { get; set; }

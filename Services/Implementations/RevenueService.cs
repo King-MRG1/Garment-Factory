@@ -4,10 +4,8 @@ using Services.Interfaces;
 using Shared.Dtos.ExpenseDtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.RevenueDtos;
+using Shared.Interfaces;
 using Shared.Mapping;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Services.Implementations
 {
@@ -70,13 +68,6 @@ namespace Services.Implementations
             return revenue.ToRevenueDto();
         }
 
-        public async Task<IEnumerable<ViewRevenueDto>> GetAllRevenuesAsync()
-        {
-            var revenues = await _unitOfWork.Revenues.GetAllRevenueAsync();
-
-            return revenues.Select(r => r.ToRevenueDto());
-        }
-
         public async Task<ViewRevenueDto?> GetRevenueByIdAsync(int id)
         {
             var revenue = await _unitOfWork.Revenues.GetRevenueByIdAsync(id);
@@ -85,13 +76,6 @@ namespace Services.Implementations
                 return null;
 
             return revenue.ToRevenueDto();
-        }
-
-        public async Task<IEnumerable<ViewRevenueDto>> GetRevenueByTraderIdAsync(int traderId)
-        {
-            var revenues = await _unitOfWork.Revenues.GetRevenuesByTraderIdAsync(traderId);
-
-            return revenues.Select(r => r.ToRevenueDto());
         }
 
         public async Task<ViewRevenueDto?> UpdateRevenueAsync(int id,UpdateRevenueDto updateRevenue)

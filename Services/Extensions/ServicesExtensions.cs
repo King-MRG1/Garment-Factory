@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Services.Implementations;
 using Services.Interfaces;
+using Shared.Interfaces;
 
 namespace Services.Extensions
 {

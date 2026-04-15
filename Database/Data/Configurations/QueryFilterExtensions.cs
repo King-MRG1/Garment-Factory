@@ -7,7 +7,7 @@ namespace Database.Data.Configurations
     public static class QueryFilterExtensions
     {
         public static void AddMultiTenantFilters(this ModelBuilder modelBuilder, 
-            Func<string?> getCurrentUserId)
+            AppDbContext context)
         {
             var userOwnedType = typeof(IUserOwned);
             var entityTypes = modelBuilder.Model.GetEntityTypes()
@@ -24,15 +24,15 @@ namespace Database.Data.Configurations
                     ?? throw new InvalidOperationException(
                         $"Could not find ConfigureUserFilter method for {entityType.Name}");
 
-                method.Invoke(null, new object?[] { modelBuilder, getCurrentUserId });
+                method.Invoke(null, new object?[] { modelBuilder, context });
             }
         }
         private static void ConfigureUserFilter<T>(ModelBuilder modelBuilder, 
-            Func<string?> getCurrentUserId) 
+            AppDbContext context) 
             where T : class, IUserOwned
         {
             modelBuilder.Entity<T>()
-                .HasQueryFilter(e => e.UserId == getCurrentUserId());
+                .HasQueryFilter(e => e.UserId == context.CurrentUserId);
         }
     }
 }

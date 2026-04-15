@@ -1,3 +1,4 @@
+using API.Exceptions;
 using Database.Data;
 using Database.Models;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +18,8 @@ namespace API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
             builder.Services
                 .AddIdentity<ApplicationUser, IdentityRole>()
@@ -57,7 +59,8 @@ namespace API
             builder.Services.AddRepositories();
             builder.Services.AddServices();
             builder.Services.AddDbContext<AppDbContext>(option =>
-                option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")
+                ,sqloptions => sqloptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
             var jwtIssuer = builder.Configuration["JWT:Issuer"];
             var jwtAudience = builder.Configuration["JWT:Audience"];
@@ -103,6 +106,8 @@ namespace API
                 });
 
             var app = builder.Build();
+
+            app.UseExceptionHandler();
 
             app.MapGet("/", () => "Hello World!");
 

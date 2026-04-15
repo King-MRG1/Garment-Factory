@@ -17,7 +17,7 @@ namespace Database.Data
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private string? CurrentUserId =>
+        public string? CurrentUserId =>
             _httpContextAccessor.HttpContext?.User
             .FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -38,7 +38,7 @@ namespace Database.Data
 
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-            builder.AddMultiTenantFilters(() => CurrentUserId);
+            builder.AddMultiTenantFilters(this);
         }
     }
 }

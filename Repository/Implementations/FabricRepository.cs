@@ -12,19 +12,30 @@ namespace Repository.Implementations
             
         }
 
-        public async Task<IEnumerable<Fabric>> GetAllFabricsWithTradersAsync()
+        public Task<Fabric?> GetFabricByIdAsync(int id)
         {
-           var fabrics = await _context.Fabrics.Include(f => f.Trader).ToListAsync();
-           return fabrics;
+            var fabric = _context.Fabrics
+                .Include(f => f.Trader)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            return fabric;
         }
 
-        public async Task<IEnumerable<Fabric>> GetFabricsByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+        public async Task<IEnumerable<Fabric>> GetFabricsByDateRangeAsync(
+            DateOnly startDate,
+            DateOnly endDate)
         {
-            var fabrics = await _context.Fabrics.Where(f => f.DateAdded >= startDate && f.DateAdded <= endDate).ToListAsync();
+            var fabrics = await _context.Fabrics
+                .Include(f => f.Trader)
+                .Where(f => f.DateAdded >= startDate && f.DateAdded <= endDate).ToListAsync();
             return fabrics;
         }
 
-        public async Task<IEnumerable<Fabric>> GetFabricsByFillterAsync(string fabricName, string traderName, DateOnly? startDate, DateOnly? endDate)
+        public async Task<IEnumerable<Fabric>> GetFabricsByFilterAsync(
+            string fabricName,
+            string traderName,
+            DateOnly? startDate,
+            DateOnly? endDate)
         {
             var query = _context.Fabrics.Include(f => f.Trader).AsQueryable();
 
@@ -49,27 +60,6 @@ namespace Repository.Implementations
             }
 
             return await query.ToListAsync();
-        }
-
-        public async Task<IEnumerable<Fabric>> GetFabricsByNameAsync(string name)
-        {
-            var fabrics = await _context.Fabrics.Where(f => f.Fabric_Name.Contains(name)).ToListAsync();
-
-            return fabrics;
-        }
-
-        public async Task<IEnumerable<Fabric>> GetFabricsByTraderNameAsync(string traderName)
-        {
-            var fabrics = await _context.Fabrics.Include(f => f.Trader)
-                .Where(f => f.Trader.Trader_Name.Contains(traderName)).ToListAsync(); 
-            return fabrics;
-        }
-
-        public async Task<Fabric> GetFabricWithTraderByIdAsync(int id)
-        {
-            var fabric = await _context.Fabrics.Include(f => f.Trader).FirstOrDefaultAsync(f => f.Id == id);
-
-            return fabric;
         }
     }
 }

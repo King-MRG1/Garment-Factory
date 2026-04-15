@@ -1,13 +1,10 @@
 ﻿using Database.Models;
-using Microsoft.Extensions.Logging.Abstractions;
 using Repository.Interfaces;
 using Services.Interfaces;
 using Shared.Dtos.ExpenseDtos;
 using Shared.Dtos.QueryFilters;
+using Shared.Interfaces;
 using Shared.Mapping;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Services.Implementations
 {
@@ -71,13 +68,6 @@ namespace Services.Implementations
             return expense.ToExpenseDto();
         }
 
-        public async Task<IEnumerable<ViewExpenseDto>> GetAllExpenseAsync()
-        {
-            var expense = await _unitOfWork.Expenses.GetAllExpensesAsync();
-
-            return expense.Select(e => e.ToExpenseDto());
-        }
-
         public async Task<ViewExpenseDto?> GetExpenseByIdAsync(int id)
         {
             var expense = await _unitOfWork.Expenses.GetExpenseById(id);
@@ -86,13 +76,6 @@ namespace Services.Implementations
                 return null;
 
             return expense.ToExpenseDto();
-        }
-
-        public async Task<IEnumerable<ViewExpenseDto>> GetExpensesByTraderIdAsync(int traderId)
-        {
-            var expenses = await _unitOfWork.Expenses.GetExpensesByTraderId(traderId);
-
-            return expenses.Select(e => e.ToExpenseDto());
         }
 
         public async Task<ViewExpenseDto?> UpdateExpenseAsync(int id,UpdateExpenseDto updateExpenseDto)

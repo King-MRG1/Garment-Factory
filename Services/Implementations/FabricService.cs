@@ -3,10 +3,8 @@ using Services.Interfaces;
 using Shared.Dtos.FabricDtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.ReportsDtos;
+using Shared.Interfaces;
 using Shared.Mapping;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Services.Implementations
 {
@@ -18,7 +16,8 @@ namespace Services.Implementations
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
-        }
+        } 
+
         public async Task<ViewFabricDto?> CreateFabricAsync(CreateFabricDto createFabricDto)
         {
             var fabric = createFabricDto.ToFabric();
@@ -33,7 +32,7 @@ namespace Services.Implementations
             await _unitOfWork.Fabrics.AddAsync(fabric);
             await _unitOfWork.SaveChangesAsync();
 
-            return fabric.ToFabricDto();
+            return await GetFabricByIdAsync(fabric.Id);
         }
 
         public async Task<ViewFabricDto?> DeleteFabricAsync(int id)
@@ -46,19 +45,12 @@ namespace Services.Implementations
             _unitOfWork.Fabrics.Delete(fabric);
             await _unitOfWork.SaveChangesAsync();
 
-            return fabric.ToFabricDto();
-        }
-
-        public async Task<IEnumerable<ViewFabricDto>> GetAllFabricsAsync()
-        {
-            var fabrics = await _unitOfWork.Fabrics.GetAllFabricsWithTradersAsync();
-
-            return fabrics.Select(f => f.ToFabricDto());
+            return await GetFabricByIdAsync(id);
         }
 
         public async Task<ViewFabricDto?> GetFabricByIdAsync(int id)
         {
-            var fabric = await _unitOfWork.Fabrics.GetFabricWithTraderByIdAsync(id);
+            var fabric = await _unitOfWork.Fabrics.GetFabricByIdAsync(id);
 
             if(fabric == null)
                 return null;
@@ -95,27 +87,13 @@ namespace Services.Implementations
 
         public async Task<IEnumerable<ViewFabricDto>> GetFabricsByFilterAsync(FabricFilter fabricFillter)
         {
-            var fabrics = await _unitOfWork.Fabrics.GetFabricsByFillterAsync(
+            var fabrics = await _unitOfWork.Fabrics.GetFabricsByFilterAsync(
                 fabricName: fabricFillter.FabricName,
                 traderName: fabricFillter.TraderName,
                 startDate: fabricFillter.StartDate,
                 endDate: fabricFillter.EndDate
                 );
             
-            return fabrics.Select(f => f.ToFabricDto());
-        }
-
-        public async Task<IEnumerable<ViewFabricDto>> GetFabricsByNameAsync(string name)
-        {
-           var fabrics =await _unitOfWork.Fabrics.GetFabricsByNameAsync(name);
-
-            return fabrics.Select(f => f.ToFabricDto());
-        }
-
-        public async Task<IEnumerable<ViewFabricDto>> GetFabricsByTraderNameAsync(string traderName)
-        {
-            var fabrics = await _unitOfWork.Fabrics.GetFabricsByTraderNameAsync(traderName);
-
             return fabrics.Select(f => f.ToFabricDto());
         }
 
@@ -129,7 +107,7 @@ namespace Services.Implementations
             fabric.UpdateFabric(updateFabricDto);
             await _unitOfWork.SaveChangesAsync();
 
-            return fabric.ToFabricDto();
+            return await GetFabricByIdAsync(fabric.Id);
         }
     }
 }

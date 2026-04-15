@@ -67,22 +67,15 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateFabric(CreateFabricDto createFabricDto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                var fabric = await _unitOfServices.Fabrics.CreateFabricAsync(createFabricDto);
+            var fabric = await _unitOfServices.Fabrics.CreateFabricAsync(createFabricDto);
 
-                if (fabric == null)
-                    return BadRequest();
+            if (fabric == null)
+                return BadRequest();
 
-                return CreatedAtAction(nameof(GetFabricById), new { id = fabric.Id }, fabric);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Failed to create fabric", error = ex.Message });
-            }
+            return CreatedAtAction(nameof(GetFabricById), new { id = fabric.Id }, fabric);
         }
 
         [HttpPut("{id}")]

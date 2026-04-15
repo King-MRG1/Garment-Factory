@@ -3,9 +3,7 @@ using Repository.Interfaces;
 using Services.Interfaces;
 using Shared.Dtos.OrderDtos;
 using Shared.Dtos.QueryFilters;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Shared.Interfaces;
 
 namespace Services.Implementations
 {
@@ -114,13 +112,6 @@ namespace Services.Implementations
             return order.ToOrderDto();
         }
 
-        public async Task<IEnumerable<ViewOrderDto>> GetAllOrdersAsync()
-        {
-            var orders = await _unitOfWork.Orders.GetOrdersAsync();
-
-            return orders.Select(o => o.ToOrderDto());
-        }
-
         public async Task<ViewOrderDto?> GetOrderByIdAsync(int id)
         {
             var order = await _unitOfWork.Orders.GetOrderByIdAsync(id);
@@ -129,20 +120,6 @@ namespace Services.Implementations
                 return null;
 
             return order.ToOrderDto();
-        }
-
-        public async Task<IEnumerable<ViewOrderDto>> GetOrdersByModelIdAsync(int modelId)
-        {
-            var orders = await _unitOfWork.Orders.GetOrdersByModelIdAsync(modelId);
-
-            return orders.Select(o => o.ToOrderDto());
-        }
-
-        public async Task<IEnumerable<ViewOrderDto>> GetOrdersByTraderIdAsync(int traderId)
-        {
-            var order = await _unitOfWork.Orders.GetOrdersByTraderIdAsync(traderId);
-
-            return order.Select(o => o.ToOrderDto());
         }
 
         public async Task<ViewOrderDto?> UpdateOrderAsync(int id, UpdateOrderDto updateOrderDto)

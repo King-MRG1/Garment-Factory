@@ -1,6 +1,7 @@
 ﻿using Database.Models;
 using Repository.Interfaces;
 using Services.Interfaces;
+using Shared.Interfaces;
 using Shared.Dtos;
 using Shared.Dtos.AdvanceAndDeductionDtos;
 using Shared.Dtos.QueryFilters;
@@ -12,9 +13,11 @@ namespace Services.Implementations
     public class AdvanceAndDeductionService : IAdvanceAndDeductionService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public AdvanceAndDeductionService(IUnitOfWork unitOfWork)
+        private readonly ICurrentUserService _currentUserService;
+        public AdvanceAndDeductionService(IUnitOfWork unitOfWork,ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
+            _currentUserService = currentUserService;
         }
 
         public async Task<IEnumerable<ViewEnumDto>> GetTypesAsync()
@@ -40,6 +43,12 @@ namespace Services.Implementations
         public async Task<ViewAdvanceAndDeductionDto> CreateAdvanceOrDeductionAsync(CreateAdvanceAndDeductionDto dto)
         {
             var advanceAndDeduction = dto.ToAdvanceAndDeduction();
+            var userId = _currentUserService.GetCurrentUserId();
+
+            if(userId == null)
+                throw new InvalidOperationException("UserID not found in authentication context.");
+
+            advanceAndDeduction.UserId = userId;
 
             await _unitOfWork.AdvanceAndDeductions.AddAsync(advanceAndDeduction);
             await _unitOfWork.SaveChangesAsync();

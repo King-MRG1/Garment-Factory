@@ -12,16 +12,6 @@ namespace Repository.Implementations
         {
         }
 
-        public async Task<IEnumerable<Model>> GetAllModelsAsync()
-        {
-            var models = await _context.Models
-                .Include(m => m.OrderModels)
-                .ThenInclude(om => om.Order)
-                .ToListAsync();
-
-            return models;
-        }
-
         public async Task<Model> GetModelByIdAsync(int id)
         {
             var model = await _context.Models

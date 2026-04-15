@@ -11,7 +11,6 @@ namespace Services.Interfaces
 {
     public interface IWorkerService
     {
-        public Task<IEnumerable<ViewWorkerDto>> GetAllWorkersAsync();
         public Task<ViewWorkerDto?> GetWorkerByIdAsync(int id);
         public Task<ViewWorkerDto?> CreateWorkerAsync(CreateWorkerDto createWorkerDto);
         public Task<ViewWorkerDto?> UpdateWorkerAsync(int id, UpdateWorkerDto updateWorkerDto);

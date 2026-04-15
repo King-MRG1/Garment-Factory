@@ -11,13 +11,6 @@ namespace Repository.Implementations
         {
         }
 
-        public async Task<IEnumerable<Revenue>> GetAllRevenueAsync()
-        {
-            var revenues = await _context.Revenues.Include(r => r.Trader).ToListAsync();
-
-            return revenues;
-        }
-
         public async Task<Revenue> GetRevenueByIdAsync(int id)
         {
             var revenue = await _context.Revenues.Include(r => r.Trader).FirstOrDefaultAsync(r => r.Id == id);
@@ -37,12 +30,5 @@ namespace Repository.Implementations
             return await query.ToListAsync();
         }
 
-        public async Task<IEnumerable<Revenue>> GetRevenuesByTraderIdAsync(int traderId)
-        {
-            var revenues = await _context.Revenues.Include(r => r.Trader)
-                .Where(r => r.Trader_Id == traderId).ToListAsync();
-
-            return revenues;
-        }
     }
 }

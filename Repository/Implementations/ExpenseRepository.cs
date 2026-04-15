@@ -11,13 +11,6 @@ namespace Repository.Implementations
         {
         }
 
-        public async Task<IEnumerable<Expense>> GetAllExpensesAsync()
-        {
-            var expenses = await _context.Expenses.Include(e => e.Trader).ToListAsync();
-
-            return expenses;
-        }
-
         public async Task<Expense> GetExpenseById(int id)
         {
             var expense = await _context.Expenses.Include(e => e.Trader).FirstOrDefaultAsync(e => e.Id == id);
@@ -37,11 +30,5 @@ namespace Repository.Implementations
             return await query.ToListAsync();
         }
 
-        public async Task<IEnumerable<Expense>> GetExpensesByTraderId(int traderId)
-        {
-            var expenses = await _context.Expenses.Include(e => e.Trader).Where(e => e.Trader_Id == traderId).ToListAsync();
-
-            return expenses;
-        }
     }
 }

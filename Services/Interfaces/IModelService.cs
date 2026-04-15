@@ -9,7 +9,6 @@ namespace Services.Interfaces
     public interface IModelService
     {
         public Task<ViewModelDto?> GetModelByIdAsync(int id);
-        public Task<IEnumerable<ViewModelDto>> GetAllModelsAsync();
         public Task<ViewModelDto?> CreateModelAsync(CreateModelDto createModelDto);
         public Task<ViewModelDto?> UpdateModelAsync(int id, UpdateModelDto updateModelDto);
         public Task<ViewModelDto?> DeleteModelAsync(int id);

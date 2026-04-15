@@ -6,6 +6,7 @@ using Shared.Dtos.QueryFilters;
 using Shared.Dtos.ReportsDtos;
 using Shared.Dtos.WorkerDtos;
 using Shared.Helper;
+using Shared.Interfaces;
 using Shared.Mapping;
 
 namespace Services.Implementations
@@ -46,13 +47,6 @@ namespace Services.Implementations
             _unitOfWork.Workers.Delete(worker);
             await _unitOfWork.SaveChangesAsync();
             return worker.ToWorkerDto();
-        }
-
-        public async Task<IEnumerable<ViewWorkerDto>> GetAllWorkersAsync()
-        {
-            var workers = await _unitOfWork.Workers.GetWorkersAsync();
-
-            return workers.Select(w => w.ToWorkerDto());    
         }
 
         public async Task<ViewWorkerDto?> GetWorkerByIdAsync(int id)
