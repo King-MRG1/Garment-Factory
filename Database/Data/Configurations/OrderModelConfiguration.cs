@@ -13,6 +13,10 @@ namespace Database.Data.Configurations
             builder.Property(om => om.Quantity)
                 .IsRequired();
 
+            builder.Property(om => om.Price)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)");
+
             builder.HasOne(om => om.Order)
                 .WithMany(o => o.OrderModels)
                 .HasForeignKey(om => om.Order_Id)

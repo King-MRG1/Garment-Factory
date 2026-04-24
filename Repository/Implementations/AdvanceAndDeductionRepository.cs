@@ -21,10 +21,10 @@ namespace Repository.Implementations
         }
 
         public async Task<IEnumerable<AdvanceAndDeduction>> GetAdvancesAndDeductionsByFilterAsync(
-            int type,
-            DateOnly startDate, 
-            DateOnly endDate, 
-            string workerName)
+            int? type,
+            DateOnly? startDate, 
+            DateOnly? endDate, 
+            string? workerName)
         {
             var query = _context.AdvanceAndDeductions
                 .Include(a => a.Worker)

@@ -9,8 +9,10 @@ public static class OrderMapping
         {
             Id = order.Id,
             Total_Cost = order.Total_Cost,
+            Total_Quantity = order.Total_Quantity,
             Order_Date = order.Order_Date,
             Trader_Name = order.Trader != null ? order.Trader.Trader_Name : string.Empty,
+            OrderModels = order.OrderModels.ConvertAll(om => om.ToOrderModelDto())
         };
     }
     public static Order ToOrder(this CreateOrderDto createOrderDto)

@@ -1,4 +1,5 @@
 ﻿using Database.Models;
+using Microsoft.Extensions.Logging;
 using Repository.Interfaces;
 using Services.Interfaces;
 using Shared.Dtos;
@@ -15,78 +16,164 @@ namespace Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
-        public WorkerService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+        private readonly ILogger<WorkerService> _logger;
+
+        public WorkerService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, ILogger<WorkerService> logger)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task<ViewWorkerDto?> CreateWorkerAsync(CreateWorkerDto createWorkerDto)
         {
-            var worker = createWorkerDto.ToWorker();
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            var userId = _currentUserService.GetCurrentUserId();
-            if(string.IsNullOrWhiteSpace(userId))
-                throw new InvalidOperationException("UserID not found in authentication context.");
+            try
+            {
+                _logger.LogInformation("{userContext} - Creating new worker", userContext);
 
-            worker.UserId = userId;
+                var worker = createWorkerDto.ToWorker();
 
-            await _unitOfWork.Workers.AddAsync(worker);
-            await _unitOfWork.SaveChangesAsync();
+                if (worker == null)
+                    throw new InvalidOperationException("Failed to map worker DTO to entity.");
 
-            return worker.ToWorkerDto();
+                var userId = _currentUserService.GetCurrentUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                    throw new InvalidOperationException("UserID not found in authentication context.");
+
+                worker.UserId = userId;
+
+                await _unitOfWork.Workers.AddAsync(worker);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Worker created successfully. Worker ID: {Id}", userContext, worker.Id);
+
+                return await GetWorkerByIdAsync(worker.Id);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError("{userContext} - Validation error: {Message}", userContext, ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error creating worker: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewWorkerDto?> DeleteWorkerAsync(int id)
         {
-            var worker = await _unitOfWork.Workers.GetWorkerByIdAsync(id);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if (worker == null)
-                return null;
+            try
+            {
+                _logger.LogInformation("{userContext} - Deleting worker {Id}", userContext, id);
 
-            _unitOfWork.Workers.Delete(worker);
-            await _unitOfWork.SaveChangesAsync();
-            return worker.ToWorkerDto();
+                var worker = await _unitOfWork.Workers.GetWorkerByIdAsync(id);
+
+                if (worker == null)
+                {
+                    _logger.LogWarning("{userContext} - Worker {Id} not found", userContext, id);
+                    return null;
+                }
+
+                _unitOfWork.Workers.Delete(worker);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Worker {Id} deleted successfully", userContext, id);
+
+                return await GetWorkerByIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error deleting worker: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewWorkerDto?> GetWorkerByIdAsync(int id)
         {
-            var worker = await _unitOfWork.Workers.GetWorkerByIdAsync(id);
+            try
+            {
+                var worker = await _unitOfWork.Workers.GetWorkerByIdAsync(id);
 
-            if (worker == null)
-                return null;
+                if (worker == null)
+                    return null;
 
-            return worker.ToWorkerDto();
+                return worker.ToWorkerDto();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error retrieving worker {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewWorkerDto?> UpdateWorkerAsync(int id, UpdateWorkerDto updateWorkerDto)
         {
-            var worker = await _unitOfWork.Workers.GetWorkerByIdAsync(id);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if (worker == null)
-                return null;
+            try
+            {
+                _logger.LogInformation("{userContext} - Updating worker {Id}", userContext, id);
 
-           worker.UpdateWorker(updateWorkerDto);
-            await _unitOfWork.SaveChangesAsync();
+                var worker = await _unitOfWork.Workers.GetWorkerByIdAsync(id);
 
-            return worker.ToWorkerDto();
+                if (worker == null)
+                {
+                    _logger.LogWarning("{userContext} - Worker {Id} not found", userContext, id);
+                    return null;
+                }
+
+                worker.UpdateWorker(updateWorkerDto);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Worker {Id} updated successfully", userContext, id);
+
+                return await GetWorkerByIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error updating worker: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<BaseWeeklyPaymentDto?> GetWeeklyPaymentAsync(CreateWeeklyPaymentDto dto, bool addToExpense)
         {
-            var worker = await _unitOfWork.Workers.GetWorkerByIdAsync(dto.Worker_Id);
-            if (worker == null) return null;
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            var payment =  worker.Worker_Type == WorkerType.Girls
-                ? await GetWeeklyPaymentForGirlsAsync(dto, worker)
-                : await GetWeeklyPaymentForAllWorkersExceptGirlsAsync(dto, worker);
+            try
+            {
+                _logger.LogInformation("{userContext} - Calculating weekly payment for worker {Id}", userContext, dto.Worker_Id);
 
-            if (addToExpense)
-                await AddPaymentToExpensesAsync(payment);
+                var worker = await _unitOfWork.Workers.GetWorkerByIdAsync(dto.Worker_Id);
+                if (worker == null)
+                {
+                    _logger.LogWarning("{userContext} - Worker {Id} not found", userContext, dto.Worker_Id);
+                    return null;
+                }
 
-            await _unitOfWork.SaveChangesAsync();
+                var payment = worker.Worker_Type == WorkerType.Girls
+                    ? await GetWeeklyPaymentForGirlsAsync(dto, worker)
+                    : await GetWeeklyPaymentForAllWorkersExceptGirlsAsync(dto, worker);
 
-            return payment;
+                if (addToExpense)
+                    await AddPaymentToExpensesAsync(payment);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Weekly payment calculated successfully for worker {Id}", userContext, dto.Worker_Id);
+
+                return payment;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error calculating weekly payment: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         private async Task AddPaymentToExpensesAsync(BaseWeeklyPaymentDto payment)
@@ -126,7 +213,8 @@ namespace Services.Implementations
         }
 
         private async Task<ViewWeeklyPaymentDto?>
-            GetWeeklyPaymentForAllWorkersExceptGirlsAsync(CreateWeeklyPaymentDto createWeeklyPaymentDto, Worker worker)
+            GetWeeklyPaymentForAllWorkersExceptGirlsAsync(
+            CreateWeeklyPaymentDto createWeeklyPaymentDto, Worker worker)
         { 
 
             var modelIds = createWeeklyPaymentDto.WorkItems.Select(wi => wi.Model_Id).ToList();
@@ -196,18 +284,42 @@ namespace Services.Implementations
 
         public async Task<IEnumerable<ViewEnumDto>> GetWorkerTypesAsync()
         {
-            var types = EnumHelper.GetEnumList<WorkerType>();
+            try
+            {
+                _logger.LogInformation("Retrieving worker types");
 
-            return types;
+                var types = EnumHelper.GetEnumList<WorkerType>();
+
+                return types;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error retrieving worker types: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ViewWorkerDto>> GetWorkersByFilterAsync(WorkerFilter workerFilter)
         {
-            var workers = await _unitOfWork.Workers.GetWorkersByFilterAsync(
-                workerName: workerFilter.WorkerName,
-                type: workerFilter.Type);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            return workers.Select(w => w.ToWorkerDto());
+            try
+            {
+                _logger.LogInformation("{userContext} - Retrieving workers by filter", userContext);
+
+                var workers = await _unitOfWork.Workers.GetWorkersByFilterAsync(
+                    workerName: workerFilter.WorkerName,
+                    type: workerFilter.Type);
+
+                _logger.LogInformation("{userContext} - Retrieved {Count} workers", userContext, workers.Count());
+
+                return workers.Select(w => w.ToWorkerDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error retrieving workers: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
     }
 }

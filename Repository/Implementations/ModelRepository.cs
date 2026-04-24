@@ -17,6 +17,7 @@ namespace Repository.Implementations
             var model = await _context.Models
                 .Include(m => m.OrderModels)
                 .ThenInclude(om => om.Order)
+                .ThenInclude(o => o.Trader)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             return model;
@@ -27,6 +28,7 @@ namespace Repository.Implementations
             var query = _context.Models
                 .Include(m => m.OrderModels)
                 .ThenInclude(om => om.Order)
+                .ThenInclude(o => o.Trader)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(modelName))

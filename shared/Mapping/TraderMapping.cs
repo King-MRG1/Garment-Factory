@@ -24,11 +24,11 @@ namespace Shared.Mapping
                 Amount = trader.Amount,
                 Register_date = trader.Register_date,
                 Last_Update = trader.Last_Update,
-                Phones = trader.Phones != null ? trader.Phones.ConvertAll(p => p.ToPhoneDto()) : new List<PhoneDto>(),
-                Fabrics = trader.Fabrics != null ? trader.Fabrics.ConvertAll(f => f.ToFabricDto()) : new List<ViewFabricDto>(),
-                Payments = trader.Revenues != null ? trader.Revenues.ConvertAll(r => r.ToRevenueDto()) : new List<ViewRevenueDto>(),
-                Purchases = trader.Expenses != null ? trader.Expenses.ConvertAll(e => e.ToExpenseDto()) : new List<ViewExpenseDto>(),
-                Orders = trader.Orders != null ? trader.Orders.ConvertAll(o => o.ToOrderDto()) : new List<ViewOrderDto>()
+                Phones = SafeMapping(trader.Phones, p => p.ToPhoneDto()),
+                Fabrics = SafeMapping(trader.Fabrics, f => f.ToFabricDto()),
+                Payments = SafeMapping(trader.Revenues, r => r.ToRevenueDto()),
+                Purchases = SafeMapping(trader.Expenses, e => e.ToExpenseDto()),
+                Orders = SafeMapping(trader.Orders, o => o.ToOrderDto())
             };
         }
         public static Trader ToTrader(this CreateTraderDto createTraderDto)
@@ -37,9 +37,7 @@ namespace Shared.Mapping
             {
                 Trader_Name = createTraderDto.Trader_Name,
                 Address = createTraderDto.Address,
-                Phones = createTraderDto.Phones != null
-                ? createTraderDto.Phones.ConvertAll(p => p.ToPhone()) 
-                : new List<Phone>(),
+                Phones = SafeMapping(createTraderDto.Phones, p => p.ToPhone()),
                 Trader_Type = (TraderType)createTraderDto.Trader_Type,
                 Amount = createTraderDto.Amount,
                 Register_date = DateOnly.FromDateTime(DateTime.Now),
@@ -53,6 +51,12 @@ namespace Shared.Mapping
             trader.Trader_Type = (TraderType)updateTraderDto.Trader_Type;
             trader.Amount = updateTraderDto.Amount;
             trader.Last_Update = DateOnly.FromDateTime(DateTime.Now);
+        }
+        public static List<TDto> SafeMapping<TEntity, TDto>(
+            IEnumerable<TEntity> entities,
+            Func<TEntity,TDto> mapper)
+        {
+            return entities?.Select(mapper).ToList() ?? new List<TDto>();
         }
     }
 }

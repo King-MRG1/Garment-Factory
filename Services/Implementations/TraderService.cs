@@ -30,86 +30,161 @@ namespace Services.Implementations
         {
             var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            _logger.LogInformation("{userContext} - Creating new Trader", userContext);
-
-            var trader = createTraderDto.ToTrader();
-
-            if (trader == null)
-                return null;
-
-            var userid = _currentUserService.GetCurrentUserId();
-            if (string.IsNullOrWhiteSpace(userid))
-                throw new InvalidOperationException("UserID not found in authentication context.");
-
-            trader.UserId = userid;
-
-            foreach (var phone in trader.Phones)
+            try
             {
-                phone.UserId = userid;
+                _logger.LogInformation("{userContext} - Creating new Trader", userContext);
+
+                var trader = createTraderDto.ToTrader();
+
+                if (trader == null)
+                    throw new InvalidOperationException("Failed to map trader DTO to entity.");
+
+                var userid = _currentUserService.GetCurrentUserId();
+                if (string.IsNullOrWhiteSpace(userid))
+                    throw new InvalidOperationException("UserID not found in authentication context.");
+
+                trader.UserId = userid;
+
+                foreach (var phone in trader.Phones)
+                {
+                    phone.UserId = userid;
+                }
+
+                await _unitOfWork.Traders.AddAsync(trader);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Trader created successfully. Trader ID: {Id}", userContext, trader.Id);
+
+                return await GetTraderByIdAsync(trader.Id);
             }
-
-            await _unitOfWork.Traders.AddAsync(trader);
-            await _unitOfWork.SaveChangesAsync();
-
-            _logger.LogInformation("{userContext} - Trader created successfully", userContext);
-
-            return trader.ToTraderDto();
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError("{userContext} - Validation error: {Message}", userContext, ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error creating trader: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewTraderDto?> DeleteTraderAsync(int id)
         {
-            var trader = await _unitOfWork.Traders.GetByIdAsync(id);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if (trader == null)
-                return null;
+            try
+            {
+                _logger.LogInformation("{userContext} - Deleting trader {Id}", userContext, id);
 
-            _unitOfWork.Traders.Delete(trader);
-            await _unitOfWork.SaveChangesAsync();
+                var trader = await _unitOfWork.Traders.GetByIdAsync(id);
 
-            return trader.ToTraderDto();
+                if (trader == null)
+                {
+                    _logger.LogWarning("{userContext} - Trader {Id} not found", userContext, id);
+                    return null;
+                }
+
+                _unitOfWork.Traders.Delete(trader);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Trader {Id} deleted successfully", userContext, id);
+
+                return await GetTraderByIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error deleting trader: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewTraderDto?> GetTraderByIdAsync(int id)
         {
-            var trader = await _unitOfWork.Traders.GetByIdAsync(id);
+            try
+            {
+                var trader = await _unitOfWork.Traders.GetByIdAsync(id);
 
-            if (trader == null)
-                return null;
+                if (trader == null)
+                    return null;
 
-            return trader.ToTraderDto();
+                return trader.ToTraderDto();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error retrieving trader {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ViewTraderDto>> GetTradersByFilterAsync(TraderFilter traderFilter)
         {
             var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            _logger.LogInformation("{userContext} - Retrieving Traders with filter: {filter}", userContext, traderFilter);
+            try
+            {
+                _logger.LogInformation("{userContext} - Retrieving Traders by filter", userContext);
 
-            var traders = await _unitOfWork.Traders.GetTradersByFilterAsync(
-                traderName: traderFilter.TraderName,
-                type: traderFilter.Type);
+                var traders = await _unitOfWork.Traders.GetTradersByFilterAsync(
+                    traderName: traderFilter.TraderName,
+                    type: traderFilter.Type);
 
-            return traders.Select(trader => trader.ToTraderDto());
+                _logger.LogInformation("{userContext} - Retrieved {Count} traders", userContext, traders.Count());
+
+                return traders.Select(trader => trader.ToTraderDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error retrieving traders: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ViewEnumDto>> GetTraderTypesAsync()
         {
-           var types =  EnumHelper.GetEnumList<TraderType>();
+            try
+            {
+                _logger.LogInformation("Retrieving trader types");
 
-            return types;
+                var types = EnumHelper.GetEnumList<TraderType>();
+
+                return types;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error retrieving trader types: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewTraderDto?> UpdateTraderAsync(int id, UpdateTraderDto updateTraderDto)
         {
-            var trader = await _unitOfWork.Traders.GetByIdAsync(id);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if (trader == null)
-                return null;
+            try
+            {
+                _logger.LogInformation("{userContext} - Updating trader {Id}", userContext, id);
 
-            trader.UpdateTrader(updateTraderDto);
-            await _unitOfWork.SaveChangesAsync();
+                var trader = await _unitOfWork.Traders.GetByIdAsync(id);
 
-            return trader.ToTraderDto();
+                if (trader == null)
+                {
+                    _logger.LogWarning("{userContext} - Trader {Id} not found", userContext, id);
+                    return null;
+                }
+
+                trader.UpdateTrader(updateTraderDto);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Trader {Id} updated successfully", userContext, id);
+
+                return await GetTraderByIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error updating trader: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using Database.Models;
+using Microsoft.Extensions.Logging;
 using Repository.Interfaces;
 using Services.Interfaces;
 using Shared.Dtos.ExpenseDtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.RevenueDtos;
+using Shared.Helper;
 using Shared.Interfaces;
 using Shared.Mapping;
 
@@ -13,29 +15,54 @@ namespace Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
-        public RevenueService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+        private readonly ILogger<RevenueService> _logger;
+
+        public RevenueService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, ILogger<RevenueService> logger)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task<ViewRevenueDto?> AddRevenueAsync(CreateRevenueDto createRevenue)
         {
-            var revenue = createRevenue.ToRevenue();
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if(revenue.Trader_Id.HasValue)
-                await EditAmountToTrader(revenue.Trader_Id.Value, revenue.Amount);
-            
-            var userId = _currentUserService.GetCurrentUserId();
-            if (string.IsNullOrWhiteSpace(userId))
-                throw new InvalidOperationException("UserID not found in authentication context.");
+            try
+            {
+                _logger.LogInformation("{userContext} - Creating new revenue", userContext);
 
-            revenue.UserId = userId;
+                var revenue = createRevenue.ToRevenue();
 
-            await _unitOfWork.Revenues.AddAsync(revenue);
-            await _unitOfWork.SaveChangesAsync();
+                if (revenue == null)
+                    throw new InvalidOperationException("Failed to map revenue DTO to entity.");
 
-            return revenue.ToRevenueDto();
+                if (revenue.Trader_Id.HasValue)
+                    await EditAmountToTrader(revenue.Trader_Id.Value, revenue.Amount);
+
+                var userId = _currentUserService.GetCurrentUserId();
+                if (string.IsNullOrWhiteSpace(userId))
+                    throw new InvalidOperationException("UserID not found in authentication context.");
+
+                revenue.UserId = userId;
+
+                await _unitOfWork.Revenues.AddAsync(revenue);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Revenue created successfully. Revenue ID: {Id}", userContext, revenue.Id);
+
+                return await GetRevenueByIdAsync(revenue.Id);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError("{userContext} - Validation error: {Message}", userContext, ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error creating revenue: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         private async Task EditAmountToTrader(int? traderId, decimal amount)
@@ -54,60 +81,116 @@ namespace Services.Implementations
 
         public async Task<ViewRevenueDto?> DeleteRevenue(int id)
         {
-            var revenue = await _unitOfWork.Revenues.GetRevenueByIdAsync(id);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if (revenue == null)
-                return null;
+            try
+            {
+                _logger.LogInformation("{userContext} - Deleting revenue {Id}", userContext, id);
 
-            if(revenue.Trader_Id.HasValue)
-                await EditAmountToTrader(revenue.Trader_Id, -revenue.Amount);
+                var revenue = await _unitOfWork.Revenues.GetRevenueByIdAsync(id);
 
-            _unitOfWork.Revenues.Delete(revenue);
-            await _unitOfWork.SaveChangesAsync();
+                if (revenue == null)
+                {
+                    _logger.LogWarning("{userContext} - Revenue {Id} not found", userContext, id);
+                    return null;
+                }
 
-            return revenue.ToRevenueDto();
+                if (revenue.Trader_Id.HasValue)
+                    await EditAmountToTrader(revenue.Trader_Id, -revenue.Amount);
+
+                _unitOfWork.Revenues.Delete(revenue);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Revenue {Id} deleted successfully", userContext, id);
+
+                return await GetRevenueByIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error deleting revenue: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewRevenueDto?> GetRevenueByIdAsync(int id)
         {
-            var revenue = await _unitOfWork.Revenues.GetRevenueByIdAsync(id);
+            try
+            {
+                var revenue = await _unitOfWork.Revenues.GetRevenueByIdAsync(id);
 
-            if (revenue == null)
-                return null;
+                if (revenue == null)
+                    return null;
 
-            return revenue.ToRevenueDto();
+                return revenue.ToRevenueDto();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error retrieving revenue {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
-        public async Task<ViewRevenueDto?> UpdateRevenueAsync(int id,UpdateRevenueDto updateRevenue)
+        public async Task<ViewRevenueDto?> UpdateRevenueAsync(int id, UpdateRevenueDto updateRevenue)
         {
-            var revenue = await _unitOfWork.Revenues.GetRevenueByIdAsync(id);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if (revenue == null)
-                return null;
-
-            if (updateRevenue.Trader_Id.HasValue && updateRevenue.Trader_Id != revenue.Trader_Id)
+            try
             {
-                await EditAmountToTrader(revenue.Trader_Id, -revenue.Amount);
+                _logger.LogInformation("{userContext} - Updating revenue {Id}", userContext, id);
 
-                await EditAmountToTrader(updateRevenue.Trader_Id, updateRevenue.Amount);
+                var revenue = await _unitOfWork.Revenues.GetRevenueByIdAsync(id);
+
+                if (revenue == null)
+                {
+                    _logger.LogWarning("{userContext} - Revenue {Id} not found", userContext, id);
+                    return null;
+                }
+
+                if (updateRevenue.Trader_Id.HasValue && updateRevenue.Trader_Id != revenue.Trader_Id)
+                {
+                    await EditAmountToTrader(revenue.Trader_Id, -revenue.Amount);
+
+                    await EditAmountToTrader(updateRevenue.Trader_Id, updateRevenue.Amount);
+                }
+                else if (updateRevenue.Trader_Id.HasValue)
+                {
+                    await EditAmountToTrader(revenue.Trader_Id, updateRevenue.Amount - revenue.Amount);
+                }
+
+                revenue.UpdateRevenue(updateRevenue);
+
+                 await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Revenue {Id} updated successfully", userContext, id);
+
+                return await GetRevenueByIdAsync(id);
             }
-            else if (updateRevenue.Trader_Id.HasValue)
+            catch (Exception ex)
             {
-                await EditAmountToTrader(revenue.Trader_Id, updateRevenue.Amount - revenue.Amount);
+                _logger.LogError("{userContext} - Error updating revenue: {Message}", userContext, ex.Message);
+                throw;
             }
-
-            revenue.UpdateRevenue(updateRevenue);
-
-             await _unitOfWork.SaveChangesAsync();
-
-            return revenue.ToRevenueDto();
         }
 
         public async Task<IEnumerable<ViewRevenueDto>> GetRevenuesByFilterAsync(RevenueFilter revenueFilter)
         {
-            var revenues = await _unitOfWork.Revenues.GetRevenuesByFilterAsync(traderName: revenueFilter.TraderName);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            return revenues.Select(r => r.ToRevenueDto());
+            try
+            {
+                _logger.LogInformation("{userContext} - Retrieving revenues by filter", userContext);
+
+                var revenues = await _unitOfWork.Revenues.GetRevenuesByFilterAsync(traderName: revenueFilter.TraderName);
+
+                _logger.LogInformation("{userContext} - Retrieved {Count} revenues", userContext, revenues.Count());
+
+                return revenues.Select(r => r.ToRevenueDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error retrieving revenues: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
     }
 }

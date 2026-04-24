@@ -592,6 +592,124 @@ The **Services** project implements business logic, validation, and domain opera
 - Cross-cutting operations (logging, caching)
 - Transaction management
 - External service integration
+- Comprehensive request/response logging with user context
+
+### Logging Pattern
+
+All service methods follow a consistent logging pattern based on the `OrderService` implementation:
+
+```csharp
+public async Task<ViewOrderDto?> CreateOrderAsync(CreateOrderDto createOrderDto)
+{
+    // 1. Get user context for logging (includes user ID and username)
+    var userContext = LoggingHelper.GetUserContext(_currentUserService);
+
+    try
+    {
+        // 2. Log entry point with user context and operation details
+        _logger.LogInformation("{userContext} - Creating new order", userContext);
+
+        // 3. Validate input and get required data
+        var userId = ValidateUserAndGetId();
+        var trader = await ValidateTraderExistsAsync(createOrderDto.Trader_Id);
+
+        // 4. Process business logic
+        var order = CreateOrderEntity(createOrderDto);
+        var (orderModels, totalCost, totalQuantity) = 
+            await ProcessOrderModelsAsync(order.OrderModels, createOrderDto.Is_Rental);
+
+        // 5. Persist changes
+        await PersistOrderAsync(order);
+
+        // 6. Log success with resource ID
+        _logger.LogInformation("{userContext} - Order created successfully. Order ID: {Id}",
+            userContext, order.Id);
+
+        return BuildOrderResponse(order, orderModels);
+    }
+    catch (InvalidOperationException ex)
+    {
+        // 7. Log validation errors separately
+        _logger.LogError("{userContext} - Validation error: {Message}", userContext, ex.Message);
+        throw;
+    }
+    catch (Exception ex)
+    {
+        // 8. Log unexpected errors with full context
+        _logger.LogError("{userContext} - Error creating order: {Message}", userContext, ex.Message);
+        throw;
+    }
+}
+```
+
+**Key Features:**
+- ✅ User context in every log (identifies who performed the action)
+- ✅ Information logs for successful operations and key milestones
+- ✅ Warning logs for resource not found scenarios
+- ✅ Error logs for exceptions with context
+- ✅ Resource IDs logged for created/updated/deleted resources
+- ✅ Separation of validation errors from system errors
+
+**User Context Format:**
+```
+[User: admin@example.com (ID: user-123)] - Creating new order
+```
+
+If no user is authenticated, context shows:
+```
+[Anonymous User] - Retrieving orders
+```
+
+### Applied to All Services
+
+The logging pattern has been uniformly applied to:
+- ✅ OrderService
+- ✅ TraderService
+- ✅ ModelService
+- ✅ WorkerService
+- ✅ ExpenseService
+- ✅ RevenueService
+- ✅ FabricService
+- ✅ AdvanceAndDeductionService
+
+### Exception Handling Pattern
+
+All services implement structured exception handling:
+
+```csharp
+try
+{
+    _logger.LogInformation("{userContext} - Operation description", userContext);
+
+    // Business logic and validation
+    ValidateInput();
+    var result = await _unitOfWork.Repository.OperationAsync();
+
+    _logger.LogInformation("{userContext} - Success. Resource ID: {Id}", userContext, result.Id);
+    return result;
+}
+catch (InvalidOperationException ex)
+{
+    _logger.LogError("{userContext} - Validation error: {Message}", userContext, ex.Message);
+    throw;
+}
+catch (KeyNotFoundException ex)
+{
+    _logger.LogWarning("{userContext} - Resource not found: {Message}", userContext, ex.Message);
+    throw;
+}
+catch (Exception ex)
+{
+    _logger.LogError("{userContext} - Unexpected error: {Message}", userContext, ex.Message);
+    throw;
+}
+```
+
+**Benefits:**
+- Standardized logging across all services
+- Clear distinction between validation, not found, and system errors
+- User activity tracking for audit trails
+- Easier troubleshooting with comprehensive logging
 
 ### Core Services
 
@@ -1240,7 +1358,16 @@ The API includes OpenAPI 3.0 support via **Scalar** for interactive documentatio
 
 ### Complete API Endpoints Reference
 
-📚 **Comprehensive endpoint documentation** with request/response examples is available in [ENDPOINTS.md](ENDPOINTS.md)
+📚 **Comprehensive endpoint documentation** with request/response examples is available in [endpoints.md](endpoints.md)
+
+This file includes:
+- ✅ All 9 API controllers (Order, Trader, Model, Worker, Fabric, Expense, Revenue, Advance/Deduction, Account)
+- ✅ Request/response examples for every endpoint
+- ✅ Query parameter documentation
+- ✅ Error response formats
+- ✅ HTTP status codes and meanings
+- ✅ Authentication requirements for each endpoint
+- ✅ Logging patterns and examples
 
 ### Quick Endpoint Overview
 
@@ -1722,6 +1849,65 @@ For additional help:
 
 ---
 
-**Last Updated**: April 2, 2026
-**Version**: 1.0.0
+## Recent Changes (v1.0.0 Update)
+
+### 🔄 Service Layer Enhancements
+
+#### Logging Pattern Standardization
+- **Applied comprehensive logging** to all service layers (OrderService, TraderService, ModelService, WorkerService, ExpenseService, RevenueService, FabricService, AdvanceAndDeductionService)
+- **User context tracking** in every log message using `LoggingHelper.GetUserContext()` for audit trails
+- **Structured logging levels**:
+  - `LogInformation`: Operation start and successful completion with resource IDs
+  - `LogWarning`: Resource not found scenarios
+  - `LogError`: Exception handling with detailed messages
+- **Example log message format**: `[User: admin@example.com (ID: user-123)] - Order created successfully. Order ID: 1`
+
+#### Exception Handling Improvements
+- Added try-catch-finally blocks to all service methods
+- Separated validation errors (InvalidOperationException) from system errors
+- Consistent error logging with user context and error messages
+- Proper error propagation to API controllers
+
+#### Services Updated
+```
+✅ OrderService - Complete logging and exception handling
+✅ TraderService - Enhanced with comprehensive logging
+✅ ModelService - Added logging pattern and error handlers
+✅ WorkerService - Integrated logging across all methods
+✅ ExpenseService - Standardized logging and validation
+✅ RevenueService - Added exception handling
+✅ FabricService - Comprehensive logging implementation
+✅ AdvanceAndDeductionService - Complete logging integration
+```
+
+### 📚 API Documentation
+
+#### New endpoints.md Documentation
+- **Complete endpoint reference** with request/response examples for all 50+ endpoints
+- **Organized by controller**: Account, Order, Trader, Model, Worker, Fabric, Expense, Revenue, Advance/Deduction
+- **Includes**:
+  - HTTP method and route
+  - Authentication requirements
+  - Query parameters and request body examples
+  - Response examples for all scenarios (success, 400, 404, 500)
+  - Error handling patterns
+  - Logging patterns and examples
+
+### 🏗️ Architecture Consistency
+- All services follow the same logging and exception handling pattern
+- User context tracked throughout request lifecycle
+- Consistent error responses across all controllers
+- Improved maintainability and debugging capabilities
+
+### 📝 Changes to README.md
+- Added "Logging Pattern" section to Services Layer documentation
+- Updated "Exception Handling Pattern" with detailed examples
+- Added "Recent Changes" section to track v1.0.0 updates
+- Updated API Documentation reference to point to new endpoints.md
+- Added comprehensive logging examples and use cases
+
+---
+
+**Last Updated**: January 15, 2025
+**Version**: 1.0.0 - Logging & Documentation Update
 **Status**: Active Development

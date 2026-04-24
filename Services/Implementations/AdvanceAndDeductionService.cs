@@ -1,4 +1,5 @@
 ﻿using Database.Models;
+using Microsoft.Extensions.Logging;
 using Repository.Interfaces;
 using Services.Interfaces;
 using Shared.Interfaces;
@@ -14,83 +15,180 @@ namespace Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
-        public AdvanceAndDeductionService(IUnitOfWork unitOfWork,ICurrentUserService currentUserService)
+        private readonly ILogger<AdvanceAndDeductionService> _logger;
+
+        public AdvanceAndDeductionService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, ILogger<AdvanceAndDeductionService> logger)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<ViewEnumDto>> GetTypesAsync()
         {
-            var types = EnumHelper.GetEnumList<AdvanceOrDeduction>();
+            try
+            {
+                _logger.LogInformation("Retrieving advance and deduction types");
 
-            return types;
+                var types = EnumHelper.GetEnumList<AdvanceOrDeduction>();
+
+                return types;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error retrieving types: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ViewAdvanceAndDeductionDto>>
             GetAdvancesAndDeductionsByFilterAsync(AdvanceAndDeductionFilter filter)
         {
-            var advancesAndDeductions = await _unitOfWork.AdvanceAndDeductions
-                .GetAdvancesAndDeductionsByFilterAsync(
-               type: filter.Type ?? 0,
-                startDate: filter.StartDate,
-                endDate: filter.EndDate,
-                workerName: filter.WorkerName);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            return advancesAndDeductions.Select(a => a.ToAdvanceAndDeductionDto());
+            try
+            {
+                _logger.LogInformation("{userContext} - Retrieving advances and deductions by filter", userContext);
+
+                var advancesAndDeductions = await _unitOfWork.AdvanceAndDeductions
+                    .GetAdvancesAndDeductionsByFilterAsync(
+                   type: filter.Type ?? 0,
+                    startDate: filter.StartDate,
+                    endDate: filter.EndDate,
+                    workerName: filter.WorkerName);
+
+                _logger.LogInformation("{userContext} - Retrieved {Count} records", userContext, advancesAndDeductions.Count());
+
+                return advancesAndDeductions.Select(a => a.ToAdvanceAndDeductionDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error retrieving advances and deductions: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
-        public async Task<ViewAdvanceAndDeductionDto> CreateAdvanceOrDeductionAsync(CreateAdvanceAndDeductionDto dto)
+        public async Task<ViewAdvanceAndDeductionDto> CreateAdvanceOrDeductionAsync(
+            CreateAdvanceAndDeductionDto dto)
         {
-            var advanceAndDeduction = dto.ToAdvanceAndDeduction();
-            var userId = _currentUserService.GetCurrentUserId();
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if(userId == null)
-                throw new InvalidOperationException("UserID not found in authentication context.");
+            try
+            {
+                _logger.LogInformation("{userContext} - Creating new advance or deduction", userContext);
 
-            advanceAndDeduction.UserId = userId;
+                var advanceAndDeduction = dto.ToAdvanceAndDeduction();
 
-            await _unitOfWork.AdvanceAndDeductions.AddAsync(advanceAndDeduction);
-            await _unitOfWork.SaveChangesAsync();
+                if (advanceAndDeduction == null)
+                    throw new InvalidOperationException("Failed to map advance/deduction DTO to entity.");
 
-            return advanceAndDeduction.ToAdvanceAndDeductionDto();
+                var userId = _currentUserService.GetCurrentUserId();
+
+                if (string.IsNullOrWhiteSpace(userId))
+                    throw new InvalidOperationException("UserID not found in authentication context.");
+
+                advanceAndDeduction.UserId = userId;
+
+                await _unitOfWork.AdvanceAndDeductions.AddAsync(advanceAndDeduction);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Advance/Deduction created successfully. ID: {Id}", userContext, advanceAndDeduction.Id);
+
+                return await GetAdvanceOrDeductionByIdAsync(advanceAndDeduction.Id);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError("{userContext} - Validation error: {Message}", userContext, ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error creating advance/deduction: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
-        public async Task<ViewAdvanceAndDeductionDto> UpdateAdvanceOrDeductionAsync(int id, UpdateAdvanceAndDeductionDto dto)
+        public async Task<ViewAdvanceAndDeductionDto> UpdateAdvanceOrDeductionAsync(
+            int id, UpdateAdvanceAndDeductionDto dto)
         {
-            var existing = await _unitOfWork.AdvanceAndDeductions.GetByIdAsync(id);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if (existing == null)
-                throw new KeyNotFoundException($"Advance or Deduction with ID {id} not found.");
+            try
+            {
+                _logger.LogInformation("{userContext} - Updating advance/deduction {Id}", userContext, id);
 
-            existing.UpdateAdvanceAndDeduction(dto);
+                var existing = await _unitOfWork.AdvanceAndDeductions.GetByIdAsync(id);
 
-            _unitOfWork.AdvanceAndDeductions.Update(existing);
-            await _unitOfWork.SaveChangesAsync();
-            return existing.ToAdvanceAndDeductionDto();
+                if (existing == null)
+                    throw new KeyNotFoundException($"Advance or Deduction with ID {id} not found.");
+
+                existing.UpdateAdvanceAndDeduction(dto);
+
+                _unitOfWork.AdvanceAndDeductions.Update(existing);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Advance/Deduction {Id} updated successfully", userContext, id);
+
+                return await GetAdvanceOrDeductionByIdAsync(existing.Id);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning("{userContext} - Record not found: {Message}", userContext, ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error updating advance/deduction: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewAdvanceAndDeductionDto> DeleteAdvanceOrDeductionAsync(int id)
         {
-            var existing = await _unitOfWork.AdvanceAndDeductions.GetByIdAsync(id);
+            var userContext = LoggingHelper.GetUserContext(_currentUserService);
 
-            if (existing == null)
-                return null;
+            try
+            {
+                _logger.LogInformation("{userContext} - Deleting advance/deduction {Id}", userContext, id);
 
-            _unitOfWork.AdvanceAndDeductions.Delete(existing);
-            await _unitOfWork.SaveChangesAsync();
+                var existing = await _unitOfWork.AdvanceAndDeductions.GetByIdAsync(id);
 
-            return existing.ToAdvanceAndDeductionDto();
+                if (existing == null)
+                {
+                    _logger.LogWarning("{userContext} - Advance/Deduction {Id} not found", userContext, id);
+                    return null;
+                }
+
+                _unitOfWork.AdvanceAndDeductions.Delete(existing);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("{userContext} - Advance/Deduction {Id} deleted successfully", userContext, id);
+
+                return existing.ToAdvanceAndDeductionDto();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("{userContext} - Error deleting advance/deduction: {Message}", userContext, ex.Message);
+                throw;
+            }
         }
 
         public async Task<ViewAdvanceAndDeductionDto> GetAdvanceOrDeductionByIdAsync(int id)
         {
-            var existing = await _unitOfWork.AdvanceAndDeductions.GetAdvanceAndDeductionsByIdAsync(id);
+            try
+            {
+                var existing = await _unitOfWork.AdvanceAndDeductions.GetAdvanceAndDeductionsByIdAsync(id);
 
-            if (existing == null)
-                return null;
+                if (existing == null)
+                    return null;
 
-            return existing.ToAdvanceAndDeductionDto();
+                return existing.ToAdvanceAndDeductionDto();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error retrieving advance/deduction {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
     }
 }

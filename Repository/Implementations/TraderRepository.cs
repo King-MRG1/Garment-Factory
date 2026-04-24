@@ -19,6 +19,8 @@ namespace Repository.Implementations
                 .Include(Trader => Trader.Revenues)
                 .Include(Trader => Trader.Expenses)
                 .Include(Trader => Trader.Orders)
+                .ThenInclude(o => o.OrderModels)
+                .ThenInclude(om => om.Model)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             return trader;
@@ -32,6 +34,8 @@ namespace Repository.Implementations
                 .Include(Trader => Trader.Revenues)
                 .Include(Trader => Trader.Expenses)
                 .Include(Trader => Trader.Orders)
+                .ThenInclude(o => o.OrderModels)
+                .ThenInclude(om => om.Model)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(name))

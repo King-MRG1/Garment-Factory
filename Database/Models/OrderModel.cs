@@ -9,6 +9,7 @@ namespace Database.Models
         public int Model_Id { get; set; }
         public int Order_Id { get; set; }
         public int Quantity { get; set; }
+        public decimal Price { get; set; }
         public Model Model { get; set; }
         public Order Order { get; set; }
         public string UserId { get; set; }
