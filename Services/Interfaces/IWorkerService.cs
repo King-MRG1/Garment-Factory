@@ -1,11 +1,7 @@
-﻿using Database.Models;
-using Shared.Dtos;
+﻿using Shared;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.ReportsDtos;
 using Shared.Dtos.WorkerDtos;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Services.Interfaces
 {

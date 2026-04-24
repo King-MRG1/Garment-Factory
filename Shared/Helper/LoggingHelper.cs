@@ -9,7 +9,7 @@ namespace Shared.Helper
             var userId = currentUserService.GetCurrentUserId();
             var userName = currentUserService.GetCurrentUserName();
 
-            if(string.IsNullOrWhiteSpace(userId))
+            if (string.IsNullOrWhiteSpace(userId))
                 return "[Anonymous User]";
 
             return $"[User: {userName} (ID: {userId})]";

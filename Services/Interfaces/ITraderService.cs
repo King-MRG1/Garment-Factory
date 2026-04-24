@@ -1,4 +1,5 @@
-﻿using Shared.Dtos;
+﻿using Shared;
+using Shared.Dtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.TraderDtos;
 

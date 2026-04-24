@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Repository.Interfaces;
 using Services.Interfaces;
+using Shared;
 using Shared.Dtos;
 using Shared.Dtos.QueryFilters;
 using Shared.Dtos.ReportsDtos;

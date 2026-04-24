@@ -1,4 +1,5 @@
-﻿using Shared.Dtos;
+﻿using Shared;
+using Shared.Dtos;
 using Shared.Dtos.AdvanceAndDeductionDtos;
 using Shared.Dtos.QueryFilters;
 using System;
