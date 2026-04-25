@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Database.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigrate : Migration
+    public partial class Inial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -295,6 +295,7 @@ namespace Database.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Total_Cost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Total_Quantity = table.Column<int>(type: "int", nullable: false),
                     Order_Date = table.Column<DateOnly>(type: "date", nullable: false),
                     Trader_Id = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -395,6 +396,7 @@ namespace Database.Migrations
                     Model_Id = table.Column<int>(type: "int", nullable: false),
                     Order_Id = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>

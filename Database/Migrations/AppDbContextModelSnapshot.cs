@@ -272,6 +272,9 @@ namespace Database.Migrations
                     b.Property<decimal>("Total_Cost")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("Total_Quantity")
+                        .HasColumnType("int");
+
                     b.Property<int>("Trader_Id")
                         .HasColumnType("int");
 
@@ -293,6 +296,9 @@ namespace Database.Migrations
 
                     b.Property<int>("Model_Id")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");

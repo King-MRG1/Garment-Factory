@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260411131704_InitialMigrate")]
-    partial class InitialMigrate
+    [Migration("20260425181446_Inial")]
+    partial class Inial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -275,6 +275,9 @@ namespace Database.Migrations
                     b.Property<decimal>("Total_Cost")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("Total_Quantity")
+                        .HasColumnType("int");
+
                     b.Property<int>("Trader_Id")
                         .HasColumnType("int");
 
@@ -296,6 +299,9 @@ namespace Database.Migrations
 
                     b.Property<int>("Model_Id")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
