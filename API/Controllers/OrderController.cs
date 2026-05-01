@@ -75,7 +75,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDto updateOrderDto)
         {
             try

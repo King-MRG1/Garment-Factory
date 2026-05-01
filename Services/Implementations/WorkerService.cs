@@ -45,6 +45,11 @@ namespace Services.Implementations
 
                 worker.UserId = userId;
 
+                foreach(var phone in worker.Phones)
+                {
+                    phone.UserId = userId;
+                }
+
                 await _unitOfWork.Workers.AddAsync(worker);
                 await _unitOfWork.SaveChangesAsync();
 

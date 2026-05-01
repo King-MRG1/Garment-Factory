@@ -24,7 +24,8 @@ namespace Repository.Implementations
             int? type,
             DateOnly? startDate, 
             DateOnly? endDate, 
-            string? workerName)
+            string? workerName,
+            bool? isUsed)
         {
             var query = _context.AdvanceAndDeductions
                 .Include(a => a.Worker)
@@ -41,6 +42,9 @@ namespace Repository.Implementations
 
             if (string.IsNullOrEmpty(workerName) == false)
                 query = query.Where(a => a.Worker.Worker_Name.Contains(workerName));
+
+            if(isUsed.HasValue)
+                query = query.Where(a => a.IsUsed == isUsed);
 
             return await query.ToListAsync();
         }

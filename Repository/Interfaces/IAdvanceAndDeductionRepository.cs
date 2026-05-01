@@ -6,7 +6,7 @@ namespace Repository.Interfaces
     {
         public Task<AdvanceAndDeduction> GetAdvanceAndDeductionsByIdAsync(int id);
         public Task<IEnumerable<AdvanceAndDeduction>> GetAdvancesAndDeductionsByFilterAsync
-            (int? type, DateOnly? startDate, DateOnly? endDate, string? workerName);
+            (int? type, DateOnly? startDate, DateOnly? endDate, string? workerName,bool? isUsed);
         public Task MakeAdvanceAndDeductionUsed(List<int> advanceAndDeductionIds);
     }
 }

@@ -56,7 +56,8 @@ namespace Services.Implementations
                    type: filter.Type ?? 0,
                     startDate: filter.StartDate,
                     endDate: filter.EndDate,
-                    workerName: filter.WorkerName);
+                    workerName: filter.WorkerName,
+                    isUsed: filter.IsUsed);
 
                 _logger.LogInformation("{userContext} - Retrieved {Count} records", userContext, advancesAndDeductions.Count());
 
